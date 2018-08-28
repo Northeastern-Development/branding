@@ -1,3 +1,12 @@
+= 7.5 =
+New: The firewall algorithms have been improved and now inspect the contents of all files that are being tried to upload on a website.
+New: The traffic logger can save headers, cookies and the $_SERVER variable for every HTTP request.
+New: The scanner now scans installed plugins for known vulnerabilities. If you have enabled scheduled automatic scans you will be notified in a email report.
+Update: A set of new malware signatures amd patterns have been added to detect malware submitted through a contact form as well as any HTTP request fields.
+Update: Now the plugin inspects user sign ups (user registrations) on multisite WordPress installations and BuddyPress.
+Update: The search for user activity, as well as enabling activity notifications, is improved.
+*[Read more](https://wpcerber.com/wp-cerber-security-7-5/)
+
 = 7.2 =
 * New: Monitoring new and changed files.
 * New: Detecting malicious redirections and directives in .htaccess files.

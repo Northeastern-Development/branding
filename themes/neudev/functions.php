@@ -65,6 +65,50 @@ if (function_exists('add_theme_support'))
     Functions
 \*------------------------------------*/
 
+
+
+
+/* ******************************************************************
+
+FUNCTION: protect downloads section
+
+this will password protect the downloads section (beyond the overview page)
+hopefully this will be easily integrated with Shibboleth
+
+****************************************************************** */
+function protect_downloads_section(){
+
+  // get the current post we are looking at
+  $post = get_post();
+
+  // determine what, if any, is the parent of this page that we are currently on
+  $parentPost = get_post(wp_get_post_parent_id($post->ID));
+
+  // make sure that we are in the downloads section of the site, and that we are not on the overview page
+  if($parentPost->post_name == 'downloads' && $post->post_name != 'overview'){
+
+    // check to see if the user is logged in to access these pages
+    if(!is_user_logged_in()){ // not logged in
+      wp_redirect('/neulogin/?redirect_to=' . $_SERVER["REQUEST_URI"]); // send to login, then back to requested page on success
+    }
+  }
+
+}
+
+add_action('template_redirect','protect_downloads_section');
+/* *************************************************************** */
+
+
+
+
+
+
+
+
+
+
+
+
 //Limits amount of menu items shown in the header. Prevents mktg from adding in to many nav items which would effect mobile
 add_filter( 'wp_nav_menu_objects', 'mytheme_menufilter', 10, 2 );
 function mytheme_menufilter($items, $args) {
@@ -77,7 +121,7 @@ function mytheme_menufilter($items, $args) {
 				$toplinks++;
 			}
 			// if we've passed our max # ...
-			if ( $toplinks > 5 ) {
+			if ( $toplinks > 6 ) {
 				unset($items[$k]);
 			}
 		}

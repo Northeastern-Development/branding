@@ -45,10 +45,10 @@ function cerber_tools_page() {
         <h2 class="nav-tab-wrapper cerber-tabs">
 			<?php
 
-			echo '<a href="' . cerber_admin_link( 'imex' ) . '" class="nav-tab ' . ( $tab == 'imex' ? 'nav-tab-active' : '' ) . '"><span class="dashicons dashicons-admin-generic"></span> ' . __( 'Export & Import' ) . '</a>';
-			echo '<a href="' . cerber_admin_link( 'diagnostic' ) . '" class="nav-tab ' . ( $tab == 'diagnostic' ? 'nav-tab-active' : '' ) . '"><span class="dashicons dashicons-admin-tools"></span> ' . __( 'Diagnostic' ) . '</a>';
-			echo '<a href="' . cerber_admin_link( 'license' ) . '" class="nav-tab ' . ( $tab == 'license' ? 'nav-tab-active' : '' ) . '"><span class="dashicons dashicons-id-alt"></span> ' . __( 'License' ) . '</a>';
-			echo '<a href="' . cerber_admin_link('help',array('page'=>cerber_get_admin_page())) . '" class="nav-tab ' . ( $tab == 'help' ? 'nav-tab-active' : '') . '"><span class="dashicons dashicons-editor-help"></span> ' . __('Help','wp-cerber') . '</a>';
+			echo '<a href="' . cerber_admin_link( 'imex' ) . '" class="nav-tab ' . ( $tab == 'imex' ? 'nav-tab-active' : '' ) . '"><i class="crb-icon crb-icon-bx-layer"></i> ' . __( 'Export & Import' ) . '</a>';
+			echo '<a href="' . cerber_admin_link( 'diagnostic' ) . '" class="nav-tab ' . ( $tab == 'diagnostic' ? 'nav-tab-active' : '' ) . '"><i class="crb-icon crb-icon-bx-wrench"></i> ' . __( 'Diagnostic' ) . '</a>';
+			echo '<a href="' . cerber_admin_link( 'license' ) . '" class="nav-tab ' . ( $tab == 'license' ? 'nav-tab-active' : '' ) . '"><i class="crb-icon crb-icon-bx-key"></i> ' . __( 'License' ) . '</a>';
+			echo '<a href="' . cerber_admin_link('help',array('page'=>cerber_get_admin_page())) . '" class="nav-tab ' . ( $tab == 'help' ? 'nav-tab-active' : '') . '"><i class="crb-icon crb-icon-bx-idea"></i> ' . __('Help','wp-cerber') . '</a>';
 
 			echo lab_indicator();
             ?>
