@@ -5,6 +5,7 @@
   margin-left:$gutter;
   & > h1 {
     @include font-5b-c;
+    text-align: left;
   }
   & > h3 {
     @include font-2b-l;
