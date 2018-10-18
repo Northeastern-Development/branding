@@ -1,11 +1,11 @@
 === EWWW Image Optimizer ===
 Contributors: nosilver4u
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=MKMQKCBFFG3WW
-Tags: image, compress, optimize, optimization, lossless, lossy, seo, tinyjpg, tinypng, webp, wp-cli
-Requires at least: 4.6
+Tags: image, compress, resize, optimize, optimization, lossless, lossy, seo, webp, wp-cli, scale, tinypng, tinyjpg
+Requires at least: 4.9
 Tested up to: 4.9
-Requires PHP: 5.4
-Stable tag: 4.2.3
+Requires PHP: 5.5
+Stable tag: 4.4.2
 License: GPLv3
 
 Speed up your website and improve your visitors' experience by automatically compressing and resizing images and PDFs. Boost SEO and improve sales.
@@ -34,11 +34,11 @@ If you need a version of this plugin for API use only, see [EWWW Image Optimizer
 
 = Automatic Resizing =
 
-With ExactDN support, images will be automatically resized to fit the page and device size. ExactDN also enables basic retina support and automatic lossless compression.
+With ExactDN support, images will be automatically resized to fit the page and device size. ExactDN also enables basic retina support and automatic compression.
 
 = Support =
 
-If you need assistance using the plugin, please visit our [Support Page](https://ewww.io/contact-us/). The forums are community supported only.
+If you need assistance using the plugin, please visit our [Support Page](https://ewww.io/contact-us/).
 The EWWW Image Optimizer is developed at https://github.com/nosilver4u/ewww-image-optimizer
 
 = Bulk Optimize =
@@ -59,7 +59,7 @@ All images created by the built-in WP_Image_Editor class will be automatically o
 
 = WebP Images =
 
-Can generate WebP versions of your images, and enables you to serve even smaller images to supported browsers. Several methods are available for serving WebP images, including Apache-compatible rewrite rules and our Alternative WebP Rewriting option compatible with caches and CDNs. Also works with the WebP option in the Cache Enabler plugin from KeyCDN.
+One-click WebP with ExactDN and Alternative WebP Rewriting. Otherwise, can generate WebP versions of your images, and enables you to serve even smaller images to supported browsers. Several methods are available for serving WebP images, including Apache-compatible rewrite rules and our Alternative WebP Rewriting option compatible with caches and CDNs. Also works with the WebP option in the Cache Enabler plugin from KeyCDN.
 
 = WP-CLI =
 
@@ -104,14 +104,12 @@ To receive updates when new strings are available for translation, you can signu
 
 1. Upload the "ewww-image-optimizer" plugin to your /wp-content/plugins/ directory.
 1. Activate the plugin through the 'Plugins' menu in WordPress.
-1. Ensure jpegtran, optipng, pngout and gifsicle are installed on your Linux server (basic installation instructions are below if they are not). You will receive a warning when you activate the plugin if they are not present. This message will go away once you have them installed.
 1. The plugin will attempt to install jpegtran, optipng, and gifsicle automatically for you. This requires that the wp-content folder is writable by the user running the web server.
-1. If the automatic install did not work, find the appropriate binaries for your system in the ewww-image-optimizer plugin folder, copy them to wp-content/ewww/ and remove the OS "tag" (like -linux or -fbsd). No renaming is necessary on Windows, just copy the .exe files to the wp-content/ewww folder. IMPORTANT: Do not symlink or modify the binaries in any way, or they will not pass the security checks. If you transfer files via FTP, be sure to transfer in binary mode, not ascii or text.
 1. If the binaries don't run locally, you can sign up for the EWWW IO cloud service to run them via our optimization servers: https://ewww.io/plans/
 1. *Recommended* Visit the settings page to enable/disable specific tools and turn on advanced optimization features.
 1. Done!
 
-If these steps do not work, additional documentation is available at https://docs.ewww.io. If you need further assistance using the plugin, please visit our [Support Page](https://ewww.io/contact-us/). The forums are community supported only.
+If these steps do not work, additional documentation is available at https://docs.ewww.io/article/6-the-plugin-says-i-m-missing-something. If you need further assistance using the plugin, please visit our [Support Page](https://ewww.io/contact-us/).
 
 = Webhosts =
 
@@ -141,8 +139,7 @@ The lossy JPG optimization using the API will determine the ideal quality settin
 
 = The bulk optimizer doesn't seem to be working, what can I do? =
 
-If it doesn't seem to work at all, check for javascript problems using the developer console in Firefox or Chrome. If it is not working just on some images, you may need to increase the setting max_execution_time in your php.ini file. There are also other timeouts with Apache, and possibly other limitations of your webhost. If you've tried everything else, the last thing to look for is large PNG files. In my tests on a shared hosting setup, "large" is anything over 300 KB. You can first try decreasing the PNG optimization level in the settings. If that doesn't work, perhaps you ought to convert that PNG to JPG or set a max PNG optimization size. Screenshots are often done as PNG files, but that is a poor choice for anything with photographic elements.
-[youtube https://www.youtube.com/watch?v=vAC1SVlh7o0]
+See https://docs.ewww.io/article/39-bulk-optimizer-failure for full troubleshooting instructions.
 
 = What are the supported operating systems? =
 
@@ -154,7 +151,7 @@ Lossless optimization is done with the command *jpegtran -copy all -optimize -pr
 
 = How are PNGs optimized? =
 
-There are three parts (and all are optional). First, using the command *pngquant original-file*, then using the commands *pngout-static -s2 original-file* and *optipng -o2 original-file*. You can adjust the optimization levels for both tools on the settings page. Optipng is an automated derivative of pngcrush, which is another widely used png optimization utility. EWWW I.O. Cloud uses TinyPNG for 10% better lossy compression than standalone pngquant.
+There are three parts (and all are optional). First, using the command *pngquant original-file*, then using the commands *pngout-static -s2 original-file* and *optipng -o2 original-file*. You can adjust the optimization levels for both tools using the [Overrides](https://docs.ewww.io/article/40-override-options). Optipng is an automated derivative of pngcrush, which is another widely used png optimization utility.
 
 = How are GIFs optimized? =
 
@@ -177,51 +174,70 @@ http://developer.yahoo.com/performance/rules.html#opt_images
 * Feature requests can be submitted via https://ewww.io/contact-us/ and commented on here: https://trello.com/b/Fp81dWof/ewww-image-optimizer
 * If you would like to help translate this plugin in your language, get started here: https://translate.wordpress.org/projects/wp-plugins/ewww-image-optimizer/
 
-= 4.2.3 =
-* added: skip resizing for images with noresize in the filename
-* added: notice about plugins that remove query strings when ExactDN is active
-* changed: cache busting for ExactDN uses theme directory modified time with fallback to EWWW IO version
-* fixed: exactdn test verification attempts to access WP_Error as an array
+= 4.4.2 =
+* added: notice for Pantheon users that an API key is required
+* added: ExactDN fully supports protocol-relative urls for non-image resources
+* changed: better lazy load support in ExactDN
+* fixed: optimization failure produces rename() errors
+* fixed: folder scanner ignores files with no extension
+* fixed: Alt WebP blocks on Facebook tracking pixel
+* fixed: ExactDN srcset functions cause duplicate image requests with zoom=1
+* fixed: ExactDN srcset fill adds double arguments to urls
+* fixed: srcset fill generates notices with non-numeric widths
+* fixed: bulk scanner stuck in resume mode with nothing to do
 
-= 4.2.2 =
-* added: view pages with ExactDN or the entire plugin disabled via GET paramaters: ewwwio_disable and exactdn_disable
-* changed: moved to v2 quota endpoint for API
-* changed: S3 uploads no longer deferred until after optimization by default, define EWWW_IMAGE_OPTIMIZER_DEFER_S3 as true to override
-* changed: image editor extensions can be disabled separately from media library optimization via EWWW_IMAGE_OPTIMIZER_DISABLE_EDITOR
-* changed: use exactdn url instead of standard API url for verification simulation and fallback
-* fixed: async test outputs unescaped html on settings page when debugging enabled
-* fixed: debugging uses extra memory when dumping output to file
-* fixed: json_encode dies silently when passing non-utf8 data, results in AJAX/bulk errors
-* fixed: disabled auto-optimization bypassed for resizes when max dimensions are set
-* fixed: NextGEN support disabled for version 3
-* fixed: progressbar color does not match admin theme for NextGEN/Nextcellent
-* fixed: optimization details overlay styling missing for NextGEN with some locales
-* fixed: FlAGallery batch optimization from Manage Galleries/Images broken
-* fixed: undefined variable notices for resize detection and forced re-optimization
-* updated: PEL library for maintaining metadata during JPG auto-rotation
+= 4.4.1 =
+* fixed: ExactDN srcset fill replaces images with first image on page
 
-= 4.2.1 =
-* fixed: EXACTDN_LOCAL_DOMAIN does not work with auto-verification
-* fixed: uncaught error during upgrade when 'SHOW FULL COLUMNS' fails
-* fixed: async simulation gets 403 error
+= 4.4.0 =
+* added: preserve animations in GIF images during resize operations
+* added: ExactDN will fill in srcset/sizes attributes for all images based on detected width for better mobile support
+* added: configuration options in the settings page for several "hidden" ExactDN options
+* changed: Alt WebP still depends on jQuery, but jQuery can be loaded in async or defer mode
+* changed: Remove Metadata option has been renamed, if you previously had it configured as an override (JPEGTRAN_COPY), please use the new name: EWWW_IMAGE_OPTIMIZER_METADATA_REMOVE
+* changed: ExactDN uses premium compression by default
+* fixed: regression with ExactDN and max-width style attributes
+* fixed: WP esc_url mangles ExactDN urls
+* fixed: WebP images missing from S3 when using WP Offload S3
+* fixed: PDF uploads with S3 Uploads plugin
+* deprecated: PHP 5.5 support will be removed in the next major release (version 4.5)
+* removed: PHP 5.4 no longer supported
 
-= 4.2.0 =
-* added: disable ExactDN attachment ID queries if they take too long
-* added: ExactDN compatibility with a3 Lazy Load
-* added: ability to re-test async/background mode if it gets disabled
-* changed: better compatibility between Autoptimize and ExactDN
-* changed: .webp files removed when restoring original from API
-* changed: Force re-optimize checkbox persists up to an hour if bulk optimizer is interrupted
-* fixed: CSS, JS, and other resources could be skipped by ExactDN in certain circumstances
-* fixed: Jupiter theme captcha incompatible with ExactDN
-* fixed: prevent calls to php_uname when it is disabled
-* fixed: MacOS X installer for PNGOUT
-* fixed: prevent notices due to empty output from exec()
-* fixed: ExactDN fails to crop when image_downsize() is called with explicit dimensions
-* fixed: ExactDN breaks image resizing with Themify themes
-* fixed: multi-site settings throws error during submission when ExactDN is active
-* fixed: single-site override option displayed when plugin activated per-site
-* removed: PHP 5.3 no longer supported
+= 4.3.2 =
+* changed: prevent dynamic JS/CSS urls within wp-admin/ from being rewritten by ExactDN
+* fixed: auto-convert PNG to JPG was running on images with transparency
+* fixed: Alt WebP broken on sites that have jquery-migrate disabled
+
+= 4.3.1 =
+* fixed: fatal error on older WP versions due to missing privacy policy function
+
+= 4.3.0 =
+* added: Alt WebP enables instant conversion with ExactDN, no need for bulk optimize
+* added: links within settings and other notices for contextual help
+* added: auto-convert large PNG images to JPG during upload, define EWWW_IMAGE_OPTIMIZER_DISABLE_AUTOCONVERT to skip
+* added: use file modification time to add query strings on JS/CSS files for cache invalidation on ExactDN
+* added: use EXACTDN_EXCLUDE in wp-config.php to bypass ExactDN for JS, CSS, etc.
+* added: NextGEN image urls properly rewritten for ExactDN
+* added: NextGEN dynamic thumbs included during manual/bulk optimization
+* added: auto-installer for Cloud plugin when running EWWW IO on a "banned" webhost
+* added: suggested privacy policy text for users of the API and ExactDN
+* added: detect wordpress.com sites and disable exec function and binaries
+* changed: resizing uses the primary media dimensions unless the "other" dimensions are configured
+* changed: Resize Other Images removed from GUI, configure via Overrides tab
+* changed: filter NextGEN quality to prevent oversized thumbs
+* changed: allow crop via filter even when one dimension is the same as the original
+* changed: auto-rotate function disabled with EWWW_IMAGE_OPTIMIZER_DISABLE_AUTOROTATE
+* changed: one-click copy for debug info, and debug collapsed by default in media library and bulk results
+* changed: bulk operations for batches of NextGEN images now use the bulk optimizer page instead of loading inline
+* fixed: thumbs not generated during WP/LR Sync
+* fixed: uploading images in the Gutenberg editor uses the wrong resize dimensions
+* fixed: unique filename function producing names with a hyphen and no digits
+* fixed: encoded ampersands within the path portion of a url prevent ExactDN parsing
+* fixed: entering a decimal for bulk delay does nothing
+* fixed: if urls on a localized WPML domain are using the default domain, ExactDN ignores them
+* fixed: toggle for plugin status and bulk status generate admin-ajax.php 403 errors
+* fixed: PNGOUT installer confirmation notice was missing
+* deprecated: PHP 5.4 support will be removed in the next major release (version 4.4)
 
 = Earlier versions =
 Please refer to the separate changelog.txt file.
@@ -247,83 +263,3 @@ Please refer to the separate changelog.txt file.
 
 Written by [Shane Bishop](https://ewww.io). Based upon CW Image Optimizer, which was written by [Jacob Allred](http://www.jacoballred.com/) at [Corban Works, LLC](http://www.corbanworks.com/). CW Image Optimizer was based on WP Smush.it. Jpegtran is the work of the Independent JPEG Group. PEL is the work of Martin Geisler, Lars Olesen, and Erik Oskam. ExactDN class based upon the Photon module from Jetpack.
 
-= optipng =
-
-Copyright (C) 2001-2017 Cosmin Truta and the Contributing Authors.
-For the purpose of copyright and licensing, the list of Contributing
-Authors is available in the accompanying AUTHORS file.
-
-This software is provided 'as-is', without any express or implied
-warranty.  In no event will the author(s) be held liable for any damages
-arising from the use of this software.
-
-= pngquant.c =
-
-   © 1989, 1991 by Jef Poskanzer.
-
-   Permission to use, copy, modify, and distribute this software and its
-   documentation for any purpose and without fee is hereby granted, provided
-   that the above copyright notice appear in all copies and that both that
-   copyright notice and this permission notice appear in supporting
-   documentation.  This software is provided "as is" without express or
-   implied warranty.
-
-= pngquant.c and rwpng.c/h =
-
-   © 1997-2002 by Greg Roelofs; based on an idea by Stefan Schneider.
-   © 2009-2017 by Kornel Lesiński.
-
-   All rights reserved.
-
-   Redistribution and use in source and binary forms, with or without modification,
-   are permitted provided that the following conditions are met:
-
-   1. Redistributions of source code must retain the above copyright notice,
-      this list of conditions and the following disclaimer.
-
-   2. Redistributions in binary form must reproduce the above copyright notice,
-      this list of conditions and the following disclaimer in the documentation
-      and/or other materials provided with the distribution.
-
-   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-   IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-   FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-   DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-   SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-   CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-= WebP =
-
-Copyright (c) 2010, Google Inc. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-  * Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-
-  * Redistributions in binary form must reproduce the above copyright
-    notice, this list of conditions and the following disclaimer in
-    the documentation and/or other materials provided with the
-    distribution.
-
-  * Neither the name of Google nor the names of its contributors may
-    be used to endorse or promote products derived from this software
-    without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.

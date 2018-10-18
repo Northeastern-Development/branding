@@ -29,13 +29,13 @@ div.nu__accordion {
           }
         }
       }
-
       & > a {
         @include font-1b-l;
         text-transform: uppercase;
         display: block;
         margin: 0;
-        &:hover {
+        &:hover,
+        &.active{
           color:$brand_colors-grayW !important;
         }
         & > span {
@@ -44,6 +44,7 @@ div.nu__accordion {
           @include font-4-c;
           &:after {
             content: '\e313';
+            color: rgba($brand_colors-red,1.0);
           }
         }
       }
@@ -56,8 +57,22 @@ div.nu__accordion {
           }
           & > a {
             @include font-0-l;
-            &:hover {
+            &:hover,
+            &.active{
               color:$brand_colors-grayW;
+              cursor: pointer;
+            }
+          }
+          & > ul{
+            & > li{
+              padding: 0 0 0 $gutter;
+              & > a {
+                @include font-0-l;
+                &:hover,
+                &.active{
+                  color:$brand_colors-grayW;
+                }
+              }
             }
           }
         }
@@ -74,11 +89,10 @@ div.nu__accordion {
     & > .open {
       & > a {
         font-weight: 700;
-        color:$brand_colors-grayW;
         & > span {
           &:after {
             content: '\e316';
-            color:$brand_colors-grayW;
+            color: rgba($brand_colors-red,1.0);
           }
         }
       }
