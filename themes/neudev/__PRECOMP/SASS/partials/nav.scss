@@ -18,6 +18,7 @@ $mobileNav: 959px;
   flex-wrap: wrap;
   align-items: center;
   height: 100%; /*added*/
+
   & > ul {
     float:right;
     & > li {
@@ -31,6 +32,7 @@ $mobileNav: 959px;
         color: rgba(255,255,254,0.8);
         &:hover {
           color: rgba(255,255,254,1.0);
+
         }
       }
       & .neu__active {
@@ -57,7 +59,7 @@ $mobileNav: 959px;
     align-items: center;
     height: auto;
     width:97vw;
-    margin: 0 auto;
+    margin: 30px auto 0 auto;
     & > ul {
       float:none;
       & > li {

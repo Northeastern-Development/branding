@@ -231,7 +231,7 @@ function cerber_country_name( $code ) {
 	$ret = '';
 
 	if (!isset($locale)) {
-		$locale = get_bloginfo( 'language' );
+		$locale = crb_get_bloginfo( 'language' );
 		if ( $locale != 'pt-BR' && $locale != 'zh-CN' ) {
 			$locale = substr( $locale, 0, 2 );
 			if ( ! in_array( $locale, array( 'de', 'en', 'es', 'fr', 'ja', 'ru' ) ) ) {

@@ -194,10 +194,11 @@ function lab_api_send_request($workload = array()) {
 		'key' => $key,
 		'workload' => $workload,
 		'push' => $push,
-		'lang' => get_bloginfo( 'language' ),
+		'lang' => crb_get_bloginfo( 'language' ),
 		'multi' => is_multisite(),
 		'version' => CERBER_VER,
 		'PHP' => PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION,
+		'sapi' => php_sapi_name(),
 	);
 
 	$ret = lab_send_request($request);
@@ -261,24 +262,24 @@ function lab_send_request($request, $node_id = null, $scheme = null) {
 	);
 
 	$curl = @curl_init(); // @since 4.32
-	if (!$curl) return false;
+	if ( ! $curl ) {
+		return false;
+	}
 
-	curl_setopt_array($curl, array(
-		CURLOPT_URL => $scheme . '://' . $node[2] . '/engine/v1/',
-		CURLOPT_POST => true,
-		CURLOPT_HTTPHEADER => $headers,
-		CURLOPT_POSTFIELDS => $request_body,
-		CURLOPT_RETURNTRANSFER => true,
-		CURLOPT_USERAGENT => 'Cerber Security Plugin ' . CERBER_VER,
-		CURLOPT_CONNECTTIMEOUT => 2,
-		CURLOPT_TIMEOUT => 4, // including CURLOPT_CONNECTTIMEOUT
+	curl_setopt_array( $curl, array(
+		CURLOPT_URL               => $scheme . '://' . $node[2] . '/engine/v1/',
+		CURLOPT_POST              => true,
+		CURLOPT_HTTPHEADER        => $headers,
+		CURLOPT_POSTFIELDS        => $request_body,
+		CURLOPT_RETURNTRANSFER    => true,
+		CURLOPT_USERAGENT         => 'Cerber Security Plugin ' . CERBER_VER,
+		CURLOPT_CONNECTTIMEOUT    => 2,
+		CURLOPT_TIMEOUT           => 4, // including CURLOPT_CONNECTTIMEOUT
 		CURLOPT_DNS_CACHE_TIMEOUT => 4 * 3600,
-		CURLOPT_SSL_VERIFYHOST => 2,
-		CURLOPT_SSL_VERIFYPEER => true,
-	));
-
-	//curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 2);
-	//curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
+		CURLOPT_SSL_VERIFYHOST    => 2,
+		CURLOPT_SSL_VERIFYPEER    => true,
+		CURLOPT_CAINFO            => ABSPATH . WPINC . '/certificates/ca-bundle.crt',
+	) );
 
 	$start = microtime( true );
 	$data = @curl_exec($curl);
@@ -292,9 +293,19 @@ function lab_send_request($request, $node_id = null, $scheme = null) {
 
 	$response = lab_parse_response( $data );
 
-	lab_update_node_last($node[0], array( $node_delay, $response['status'], $response['error'], time(), $scheme, $node[1] ));
+	lab_update_node_last( $node[0], array(
+		$node_delay,
+		$response['status'],
+		$response['error'],
+		time(),
+		$scheme,
+		$node[1]
+	) );
 
-	if ($response['error']) return false;
+	if ( $response['error'] ) {
+		return false;
+	}
+
 	return $response;
 }
 
@@ -524,26 +535,17 @@ function lab_is_cloud_ok(){
  * @param $details
  */
 function lab_save_push( $ip, $reason_id, $details ) {
-	global $wpdb;
 	$ip = filter_var( $ip, FILTER_VALIDATE_IP );
 	if ( ! $ip || is_ip_private( $ip ) || cerber_acl_check( $ip, 'W' ) || ! ( crb_get_settings( 'cerberlab' ) || lab_lab() ) ) {
 		return;
 	}
 	$reason_id = absint( $reason_id );
-	if ($reason_id == 8 || $reason_id == 9){
+	if ( $reason_id == 8 || $reason_id == 9 ) {
 		$details = array( 'uri' => $_SERVER['REQUEST_URI'] );
 	}
 	if ( is_array( $details ) ) {
 		$details = serialize( $details );
 	}
-	/*
-	$wpdb->insert( CERBER_LAB_TABLE, array(
-		'ip'        => $ip,
-		'reason_id' => $reason_id,
-		'details'   => $details,
-		'stamp'     => time(),
-	), array( '%s', '%d', '%s', '%d' ) );
-	*/
 	$details = cerber_real_escape( $details );
 	cerber_db_query( 'INSERT INTO ' . CERBER_LAB_TABLE . ' (ip, reason_id, details, stamp) VALUES ("' . $ip . '",' . $reason_id . ',"' . $details . '",' . time() . ')' );
 }
@@ -672,6 +674,7 @@ function lab_validate_lic( $lic = '' ) {
 	}
 
 	if ( ! $ret || empty( $ret['response']['expires_gmt'] ) ) {
+		cerber_admin_notice( 'A network error occurred while verifying the license key. Please try again in a couple of minutes.' );
 		$expires = 0;
 	}
 	else {
@@ -723,30 +726,22 @@ function lab_indicator(){
  * Opt in for the connection to Cerber Lab
  *
  */
-add_action( 'admin_notices', 'lab_opt_in');
-add_action( 'network_admin_notices', 'lab_opt_in' );
 function lab_opt_in(){
-	global $cerber_shown, $crb_assets_url;
+	global $crb_assets_url;
 
-	if ($cerber_shown || crb_get_settings('cerberlab')) return;
-	if ( ! cerber_is_admin_page() ) {
+	if ( lab_lab() || crb_get_settings( 'cerberlab' ) ) {
 		return;
 	}
 
-	// Avoid more than one message on the screen
-	// TODO: to many checks!
-	if (get_site_option('cerber_admin_notice', null)) return;
-	if (get_site_option('cerber_admin_message', null)) return;
-	if (get_site_option('cerber_admin_info', null)) return;
 	if ( $o = get_site_option( '_lab_o' . 'pt_in_' ) ) {
 		//if ( $o[0] == 'NO' && ( $o[1] + 3600 * 24 * 30 ) > time() ) {
-		if ( ($o[1] + 3600 * 24 * 30 ) > time() ) {
+		if ( ( $o[1] + 3600 * 24 * 30 ) > time() ) {
 			return;
 		}
 	}
-	if ($c = get_site_option('_cerber_activated')){
-		$c = maybe_unserialize($c);
-		if (!empty($c['time']) && ($c['time'] + 3600 * 24 * 7) > time()){
+	if ( $c = get_site_option( '_cerber_activated' ) ) {
+		$c = maybe_unserialize( $c );
+		if ( ! empty( $c['time'] ) && ( $c['time'] + 3600 * 24 * 7 ) > time() ) {
 			return;
 		}
 	}

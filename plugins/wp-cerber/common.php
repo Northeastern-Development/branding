@@ -58,11 +58,11 @@ function cerber_admin_link($tab = '', $args = array()){
 	//return add_query_arg(array('record_id'=>$record_id,'mode'=>'view_record'),admin_url('admin.php?page=storage'));
 
 	if ( empty( $args['page'] ) ) {
-		if ( in_array( $tab, array( 'recaptcha', 'antispam' ) ) ) {
+		if ( in_array( $tab, array( 'antispam', 'captcha' ) ) ) {
 			$page = 'cerber-recaptcha';
-			$tab  = null;
+			//$tab  = null;
 		}
-		elseif ( in_array( $tab, array( 'imex', 'diagnostic', 'license' ) ) ) {
+		elseif ( in_array( $tab, array( 'imex', 'diagnostic', 'license', 'diag-log' ) ) ) {
 			$page = 'cerber-tools';
 		}
 		elseif ( in_array( $tab, array( 'traffic', 'ti_settings' ) ) ) {
@@ -71,7 +71,8 @@ function cerber_admin_link($tab = '', $args = array()){
 		elseif ( in_array( $tab, array( 'geo' ) ) ) {
 			$page = 'cerber-rules';
 		}
-		elseif ( in_array( $tab, array( 'scanner', 'scan_settings', 'scan_schedule' ) ) ) {
+		//elseif ( in_array( $tab, array( 'scanner', 'scan_settings', 'scan_schedule', 'scan_quarantine' ) ) ) {
+		elseif ( 0 === strpos( $tab, 'scan' ) ) {
 			$page = 'cerber-integrity';
 		}
 		else {
@@ -494,6 +495,29 @@ function recursive_search_key($array, $needle){
 }
 
 /**
+ * array_column() implementation for PHP < 5.5
+ *
+ * @param array $arr Multidimensional array
+ * @param string $column Column key
+ *
+ * @return array
+ */
+function crb_array_column( $arr = array(), $column = '' ) {
+	global $x_column;
+	$x_column = $column;
+
+	$ret = array_map( function ( $element ) {
+		global $x_column;
+
+		return $element[ $x_column ];
+	}, $arr );
+
+	$ret = array_values( $ret );
+
+	return $ret;
+}
+
+/**
  * Return true if a REST API URL has been requested
  *
  * @return bool
@@ -846,7 +870,7 @@ function cerber_get_labels( $type = 'activity', $all = true ) {
 		$labels[53]=__('Attempt to log in denied','wp-cerber');
 		$labels[54]=__('Attempt to register denied','wp-cerber');
 		$labels[55]=__('Probing for vulnerable PHP code','wp-cerber');
-		$labels[56]=__('Attempt to upload executable file denied', 'wp-cerber' );
+		$labels[56]=__('Attempt to upload malicious file denied', 'wp-cerber' );
 		$labels[57]=__('File upload denied', 'wp-cerber' );
 
 		$labels[70]=__('Request to REST API denied','wp-cerber');
@@ -874,6 +898,7 @@ function cerber_get_labels( $type = 'activity', $all = true ) {
 		$labels[20] = __( 'Suspicious number of fields', 'wp-cerber' );
 		$labels[21] = __( 'Suspicious number of nested values', 'wp-cerber' );
 		$labels[22] = __( 'Malicious code detected', 'wp-cerber' );
+		$labels[23] = __( 'Suspicious SQL code detected', 'wp-cerber' );
 	}
 
 	return $labels;
@@ -935,7 +960,8 @@ function cerber_db_error_log( $msg = null ) {
  * @param string|array $msg
  */
 function cerber_admin_notice( $msg ) {
-	if ( ! $msg ) {
+	global $cerber_doing_upgrade;
+	if ( ! $msg || $cerber_doing_upgrade ) {
 		return;
 	}
 	$notice = get_site_option( 'cerber_admin_notice', null);
@@ -956,9 +982,22 @@ function cerber_admin_notice( $msg ) {
  *
  * @param string $msg
  */
-function cerber_admin_message($msg){
-	if (!$msg) return;
-	update_site_option('cerber_admin_message', $msg);
+function cerber_admin_message( $msg ) {
+	global $cerber_doing_upgrade;
+	if ( ! $msg || $cerber_doing_upgrade ) {
+		return;
+	}
+	$notice = get_site_option( 'cerber_admin_message', null);
+	if ( ! $notice ) {
+		$notice = array();
+	}
+	if ( is_array( $msg ) ) {
+		$notice = array_merge( $notice, $msg );
+	}
+	else {
+		$notice [] = $msg;
+	}
+	update_site_option( 'cerber_admin_message', $notice );
 }
 /**
  * Return human readable "ago" time
@@ -968,8 +1007,10 @@ function cerber_admin_message($msg){
  * @return string
  */
 function cerber_ago_time( $time ) {
+	$diff = human_time_diff( $time );
 
-	return sprintf( __( '%s ago' ), human_time_diff( $time ) );
+	// _x( 'at', 'preposition of time',
+	return ( $time <= time() ) ? sprintf( __( '%s ago' ), $diff ) : sprintf( _x( 'in %s', 'preposition of a period of time like: in 6 hours', 'wp-cerber' ), $diff );
 }
 
 function cerber_auto_date( $time ) {
@@ -1132,7 +1173,7 @@ function cerber_is_index( $table, $key ) {
 function cerber_recaptcha_lang() {
 	static $lang = '';
 	if (!$lang) {
-		$lang = get_bloginfo( 'language' );
+		$lang = crb_get_bloginfo( 'language' );
 		//$trans = array('en-US' => 'en', 'de-DE' => 'de');
 		//if (isset($trans[$lang])) $lang = $trans[$lang];
 		$lang = substr( $lang, 0, 2 );
@@ -1338,6 +1379,7 @@ function cerber_db_query( $query ) {
 	}
 
 	if ( cerber_db_use_mysqli() ) {
+		//$ret = mysqli_query( $db->dbh, $query, MYSQLI_USE_RESULT );
 		$ret = mysqli_query( $db->dbh, $query );
 		if ( ! $ret ) {
 			$cerber_db_errors[] = mysqli_error( $db->dbh ) . ' for the query: ' . $query;
@@ -1489,7 +1531,7 @@ function cerber_get_db() {
 	}
 
 	//if ( ! isset( $db ) || ! is_object( $db ) ) {
-	if ( ! isset( $db ) ) {
+	if ( ! isset( $db ) || empty( $db->dbh ) ) {
 		// Check for connected DB handler
 		if ( ! is_object( $wpdb ) || empty( $wpdb->dbh ) ) {
 			if ( ! $db = cerber_db_connect() ) {
@@ -1540,6 +1582,20 @@ function cerber_db_connect() {
 	}
 
 	return false;
+}
+
+function crb_get_mysql_var( $var ) {
+	static $cache;
+	if ( ! isset( $cache[ $var ] ) ) {
+		if ( $v = cerber_db_get_row( 'SHOW VARIABLES LIKE "' . $var . '"' ) ) {
+			$cache[ $var ] = $v['Value'];
+		}
+		else {
+			$cache[ $var ] = false;
+		}
+	}
+
+	return $cache[ $var ];
 }
 
 /**
@@ -1629,7 +1685,7 @@ function cerber_get_groove_x( $regenerate = false ) {
 		$groove_x = array( $groove_0, $groove_1 );
 		update_site_option( 'cerber-groove-x', $groove_x );
 		add_action('init', function () {
-			cerber_htaccess_sync(); // keep the .htaccess rule is up to date
+			cerber_htaccess_sync( 'main' ); // keep the .htaccess rule is up to date
 		});
 	}
 
@@ -1647,72 +1703,105 @@ function cerber_get_cookie_path(){
 /**
  * Synchronize plugin settings with rules in the .htaccess file
  *
+ * @param $file
  * @param array $settings
  *
- * @return bool
+ * @return bool|string|WP_Error
  */
-function cerber_htaccess_sync( $settings = array() ) {
+function cerber_htaccess_sync( $file, $settings = array() ) {
 
 	if ( ! $settings ) {
 		$settings = crb_get_settings();
 	}
 
-	$rules = array();
+	if ( 'main' == $file ) {
+		$rules    = array();
+		if ( ! empty( $settings['adminphp'] ) ) {
+			// https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-6389
+			require_once( ABSPATH . 'wp-admin/includes/misc.php' );
+			if ( ! apache_mod_loaded( 'mod_rewrite', true ) ) {
+				return 'ERROR: The Apache mod_rewrite module is not enabled on your web server. Ask your server administrator for assistance.';
+			}
+			$groove_x = cerber_get_groove_x();
+			$cookie   = 'cerber_groove_x_' . $groove_x[0];
+			$rules [] = '# Protection of admin scripts is enabled (CVE-2018-6389)';
+			$rules [] = '<IfModule mod_rewrite.c>';
+			$rules [] = 'RewriteEngine On';
+			$rules [] = 'RewriteBase /';
+			$rules [] = 'RewriteCond %{REQUEST_URI} ^(.*)wp-admin/load-scripts\.php$ [OR,NC]';
+			$rules [] = 'RewriteCond %{REQUEST_URI} ^(.*)wp-admin/load-styles\.php$ [NC]';
+			$rules [] = 'RewriteCond %{HTTP_COOKIE} !' . $cookie . '=' . $groove_x[1];
+			$rules [] = 'RewriteRule (.*) - [R=403,L]';
+			$rules [] = '</IfModule>';
+		}
 
-	if ( ! empty( $settings['adminphp'] ) ) {
-		// https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-6389
-		$groove_x = cerber_get_groove_x();
-		$cookie = 'cerber_groove_x_'.$groove_x[0];
-		$rules [] = '# Protection of admin scripts is enabled (CVE-2018-6389)';
-		$rules [] = '<IfModule mod_rewrite.c>';
-		$rules [] = 'RewriteEngine On';
-		$rules [] = 'RewriteBase /';
-		$rules [] = 'RewriteCond %{REQUEST_URI} ^(.*)wp-admin/load-scripts\.php$ [OR,NC]';
-		$rules [] = 'RewriteCond %{REQUEST_URI} ^(.*)wp-admin/load-styles\.php$ [NC]';
-		$rules [] = 'RewriteCond %{HTTP_COOKIE} !' . $cookie . '=' . $groove_x[1];
-		$rules [] = 'RewriteRule (.*) - [R=403,L]';
-		$rules [] = '</IfModule>';
+		return cerber_update_htaccess( $file, $rules );
 	}
 
-	// Update all rules in a section - adding/deleting
-	return cerber_update_htaccess( CERBER_MARKER1, $rules );
+	if ( 'media' == $file ) {
+		$rules = array();
+		if ( ! empty( $settings['phpnoupl'] ) ) {
+			$rules [] = '<IfModule mod_php7.c>';
+			$rules [] = 'php_flag engine off';
+			$rules [] = '</IfModule>';
+			$rules [] = '<IfModule mod_php5.c>';
+			$rules [] = 'php_flag engine off';
+			$rules [] = '</IfModule>';
+		}
+
+		return cerber_update_htaccess( $file, $rules );
+	}
+
+	return false;
 }
 
 /**
  * Remove Cerber rules from the .htaccess file
  *
  */
-function cerber_htaccess_clean_up(){
-	cerber_update_htaccess( CERBER_MARKER1, array() );
+function cerber_htaccess_clean_up() {
+	cerber_update_htaccess( 'main', array() );
+	cerber_update_htaccess( 'media', array() );
 }
 
 /**
  * Update the .htaccess file
  *
- * @param $marker string A section name
+ * @param $file
  * @param array $rules A set of rules (array of strings) for the section. If empty, the section will be cleaned.
  *
- * @return bool|string  True on success, string with error message on failure
+ * @return bool|string|WP_Error  True on success, string with error message on failure
  */
-function cerber_update_htaccess($marker, $rules = array()){
-	if ( ! $marker ) {
-		return false;
+function cerber_update_htaccess( $file, $rules = array() ) {
+	if ( $file == 'main' ) {
+		$htaccess_file = cerber_get_htaccess_file();
+		$marker = CERBER_MARKER1;
 	}
-	if ( ! $htaccess_file = cerber_get_htaccess_file() ) {
-		return 'ERROR: Unable to modify the .htaccess file';
-	}
-	require_once( ABSPATH . 'wp-admin/includes/misc.php' );
-	if ( ! apache_mod_loaded( 'mod_rewrite', true ) ) {
-		return 'ERROR: Apache mod_rewrite is not enabled';
-	}
-
-	$result = insert_with_markers( $htaccess_file, CERBER_MARKER1, $rules );
-
-	if ( $result || $result === 0 ) {
-		$result = true;
+	elseif ( $file == 'media' ) {
+		$htaccess_file = cerber_get_upload_dir() . '/.htaccess';
+		$marker = CERBER_MARKER2;
 	}
 	else {
-		return 'ERROR: Unable to modify the .htaccess file';
+		return '???';
+	}
+
+	if ( ! is_file( $htaccess_file ) ) {
+		if ( ! touch( $htaccess_file ) ) {
+			return new WP_Error( 'htaccess-io', 'ERROR: Unable to create the file ' . $htaccess_file);
+		}
+	}
+	elseif ( ! is_writable( $file ) ) {
+		return new WP_Error( 'htaccess-io', 'ERROR: Unable to get access to the file ' . $htaccess_file);
+	}
+
+	require_once( ABSPATH . 'wp-admin/includes/misc.php' );
+	$result = insert_with_markers( $htaccess_file, $marker, $rules );
+
+	if ( $result || $result === 0 ) {
+		$result = 'The ' . $htaccess_file . ' file has been updated';
+	}
+	else {
+		$result = new WP_Error( 'htaccess-io', 'ERROR: Unable to modify the file ' . $htaccess_file);
 	}
 
 	return $result;
@@ -1726,13 +1815,7 @@ function cerber_update_htaccess($marker, $rules = array()){
 function cerber_get_htaccess_file() {
 	require_once( ABSPATH . 'wp-admin/includes/file.php' );
 	$home_path = get_home_path();
-	$file  = $home_path . '.htaccess';
-	if ( ! is_writable( $file ) ) {
-		// should we create the file?
-		return false;
-	}
-
-	return $file;
+	return $home_path . '.htaccess';
 }
 
 /**
@@ -1899,14 +1982,19 @@ function cerber_get_wp_version() {
 	return $v;
 }
 
-function cerber_is_base64_encoded( &$value ) {
-	if ( ! preg_match( '/[^A-Z0-9\+\/=]/i', $value ) ) {
-		if ( $value = @base64_decode( $value ) ) {
-			if ( ! preg_match( '/[\x00-\x07\x0B-\x0C\x0E-\x1F]/', $value ) ) { // ASCII control characters means not 64 encoded string
-				return true;
+function cerber_is_base64_encoded( $val ) {
+	$val = trim( $val );
+	if ( empty( $val ) || is_numeric( $val ) || strlen( $val ) < 8 || preg_match( '/[^A-Z0-9\+\/=]/i', $val ) ) {
+		return false;
+	}
+	if ( $val = @base64_decode( $val ) ) {
+		if ( ! preg_match( '/[\x00-\x08\x0B-\x0C\x0E-\x1F]/', $val ) ) { // ASCII control characters must not be
+			if ( preg_match( '/[A-Z]/i', $val ) ) { // Latin chars must be
+				return $val;
 			}
 		}
 	}
+
 
 	return false;
 }
@@ -1924,10 +2012,99 @@ function cerber_get_html_label( $iid ) {
 	if ( $iid == 1 ) {
 		$c = '#33be84;';
 	}
-	else{
+	else {
 		$c = '#dc2f34;';
 	}
 
-	return '<span style="background-color:'.$c.$css['scan-ilabel'].'">' . cerber_get_issue_label( $iid ) . '</span>';
+	return '<span style="background-color:' . $c . $css['scan-ilabel'] . '">' . cerber_get_issue_label( $iid ) . '</span>';
 
+}
+
+// @since v. 7.7 for PHP-FPM
+if ( ! function_exists( 'getallheaders' ) ) {
+	function getallheaders() {
+		$headers = array();
+		foreach ( $_SERVER as $name => $value ) {
+			if ( substr( $name, 0, 5 ) == 'HTTP_' ) {
+				$headers[ str_replace( ' ', '-', ucwords( strtolower( str_replace( '_', ' ', substr( $name, 5 ) ) ) ) ) ] = $value;
+			}
+		}
+
+		return $headers;
+	}
+}
+
+/**
+ * Write message to debug log
+ *
+ * @param string|array $msg
+ * @param string $source
+ *
+ * @return bool|int
+ */
+function cerber_diag_log( $msg, $source = '' ) {
+	if ( ! $msg || ! $log = @fopen( cerber_get_diag_log(), 'a' ) ) {
+		return false;
+	}
+	if ( $source ) {
+		$source = '[' . $source . ']';
+	}
+	if ( ! is_array( $msg ) ) {
+		$msg = array( $msg );
+	}
+	foreach ( $msg as $line ) {
+		//$ret = @fwrite( $log, '[' .cerber_get_remote_ip(). '][' . cerber_date( time() ) . ']' . $source . ' ' . $line . PHP_EOL );
+		$ret = @fwrite( $log, '[' . cerber_date( time() ) . ']' . $source . ' ' . $line . PHP_EOL );
+	}
+
+	@fclose( $log );
+
+	return $ret;
+}
+
+function cerber_get_diag_log() {
+	$dir = ( defined( 'CERBER_DIAG_DIR' ) && is_dir( CERBER_DIAG_DIR ) ) ? CERBER_DIAG_DIR . '/' : cerber_get_the_folder();
+
+	return rtrim( $dir, '/' ) . '/cerber-debug.log';
+}
+
+function cerber_truncate_log( $bytes = 10000000 ) {
+	$file = cerber_get_diag_log();
+	if ( ! is_file( $file ) || filesize( $file ) <= $bytes ) {
+		return;
+	}
+	if ( $bytes == 0 ) {
+		$log = @fopen( $file, 'w' );
+		@fclose( $log );
+		return;
+	}
+	if ( $text = file_get_contents( $file ) ) {
+		$text = substr( $text, 0 - $bytes );
+		if ( ! $log = @fopen( $file, 'w' ) ) {
+			return;
+		}
+		@fwrite( $log, $text );
+		@fclose( $log );
+	}
+}
+
+function crb_get_bloginfo( $what ) {
+	static $info = array();
+	if ( ! isset( $info[ $what ] ) ) {
+		$info[ $what ] = get_bloginfo( $what );
+	}
+
+	return $info[ $what ];
+}
+
+function crb_is_php_mod() {
+	require_once( ABSPATH . 'wp-admin/includes/misc.php' );
+	if ( apache_mod_loaded( 'mod_php7' ) ) {
+		return true;
+	}
+	if ( apache_mod_loaded( 'mod_php5' ) ) {
+		return true;
+	}
+
+	return false;
 }

@@ -161,6 +161,25 @@ function cerber_push_the_news( $version ) {
 	$news['7.5'][] = 'Now the plugin inspects user sign ups (user registrations) on multisite WordPress installations and BuddyPress.';
 	$news['7.5'][] = 'The search for user activity, as well as enabling activity notifications, is improved.';
 
+	$news['7.6'][] = 'The quarantine has got a separate admin page in the WordPress dashboard which allows viewing deleted files, restoring or deleting them.';
+	$news['7.6'][] = 'Now the malware scanner and integrity checker supports multisite WordPress installations.';
+	$news['7.6'][] = 'Bug fixed: Once an address IP has been locked out after reaching the limit to the number of attempts to log in the "We’re sorry, you are not allowed to proceed" forbidden page is being displayed instead of the normal user message "You have exceeded the number of allowed login attempts".';
+	$news['7.6'][] = 'Bug fixed: PHP Notice: Only variables should be passed by reference in cerber-load.php on line 5377';
+
+	$news['7.7'][] = 'New: Automatic cleanup of malware and suspicious files. This powerful feature is available in the PRO version and automatically deletes trojans, viruses, backdoors, and other malware. Cerber Security Professional scans the website on an hourly basis and removes malware immediately.';
+	$news['7.7'][] = 'Update: Algorithms of the malware scanner have been improved to detect obfuscated malware code more precisely for all types of files.';
+	$news['7.7'][] = 'Update: Email reports for scheduled malware scans have been extended with useful performance numbers and a list of automatically deleted malicious files if you’ve enabled automatic malware removal and some files have been deleted.';
+	$news['7.7'][] = 'Fix: A possible issue with uploading large JSON and CSV files. When Traffic Inspector scans uploaded files for malware payload, some JSON and CSV files might be erroneously identified as containing a malicious payload.';
+	$news['7.7'][] = 'Fix: A possible Divi theme forms incompatibility. If you use the Divi theme (by Elegant Themes), you can come across a problem with submitting some forms.';
+
+	$news['7.8'][] = 'New: An ignore list for the malware scanner.';
+	$news['7.8'][] = 'New: Disabling execution of PHP scripts in the WordPress media folder helps to prevent offenders from exploiting security flaws. See the Hardening tab.';
+	$news['7.8'][] = 'New: Disabling PHP error as a setting is useful for misconfigured servers. See the Hardening tab.';
+	$news['7.8'][] = 'New: English for the admin interface. Enable it if you prefer to have untranslated, original admin interface. See the Main Settings tab.';
+	$news['7.8'][] = 'New: Diagnostic logging for the malware scanner. Specify a particular location of the log file by using the CERBER_DIAG_DIR constant.';
+	$news['7.8'][] = 'Update: The performance of malware scanning on a slow web server with thousands of issues and tens of thousands of files has been improved.';
+	$news['7.8'][] = 'Fix: If a malicious file is detected on a slow shared hosting, the file can be shown twice in the results of the scan.';
+
 	if ( ! empty( $news[ $version ] ) ) {
 		//$text = '<h3>What\'s new in WP Cerber '.$version.'</h3>';
 
@@ -187,7 +206,7 @@ function cerber_admin_info($msg, $type = 'normal'){
 		'<table><tr><td><img style="float:left; margin-left:-10px;" src="'.$crb_assets_url.'icon-128x128.png"></td>'.
 		'<td>'.$msg.
 		'<p style="text-align:right;">
-		<input type="button" class="button button-primary cerber-dismiss" value=" &nbsp; '.__('Cool!','wp-cerber').' &nbsp; "/></p></td></tr></table>');
+		<input type="button" class="button button-primary cerber-dismiss" value=" &nbsp; '.__('Awesome!','wp-cerber').' &nbsp; "/></p></td></tr></table>');
 }
 
 
