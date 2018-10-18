@@ -1,6 +1,14 @@
-# This is a template .gitignore file for git-managed WordPress projects.## Fact: you don't want WordPress core files, or your server-specific# configuration files etc., in your project's repository. You just don't.
-# As such this is intended to only cover items in the wp-content folder.## Solution: this is intended to only cover items in the wp-content folder
-# and so should appear at the root of the wp-content folder.## See the comments below for more info on how to add exceptions for your# content.
+# This is a template .gitignore file for git-managed WordPress projects.
+#
+# Fact: you don't want WordPress core files, or your server-specific
+# configuration files etc., in your project's repository. You just don't.
+# As such this is intended to only cover items in the wp-content folder.
+#
+# Solution: this is intended to only cover items in the wp-content folder
+# and so should appear at the root of the wp-content folder.
+#
+# See the comments below for more info on how to add exceptions for your
+# content.
 
 
 
@@ -8,7 +16,8 @@
 /*
 
 
-# don't ignore the following specific files/folders!.gitignore
+# don't ignore the following specific files/folders
+!.gitignore
 
 
 # don't ignore the plugins directories
@@ -18,3 +27,126 @@
 
 # Ignore everything in the "themes" directory, except our custom theme
 !themes/neudev/
+plugins/simple-history/freemius/assets/img/simple-history.svg
+plugins/wordpress-seo/css/dist/admin-global-840-rtl.min.css
+plugins/wordpress-seo/css/dist/admin-global-840.min.css
+plugins/wordpress-seo/css/dist/adminbar-840-rtl.min.css
+plugins/wordpress-seo/css/dist/adminbar-840.min.css
+plugins/wordpress-seo/css/dist/alerts-840-rtl.min.css
+plugins/wordpress-seo/css/dist/alerts-840.min.css
+plugins/wordpress-seo/css/dist/dashboard-840-rtl.min.css
+plugins/wordpress-seo/css/dist/dashboard-840.min.css
+plugins/wordpress-seo/css/dist/edit-page-840-rtl.min.css
+plugins/wordpress-seo/css/dist/edit-page-840.min.css
+plugins/wordpress-seo/css/dist/featured-image-840-rtl.min.css
+plugins/wordpress-seo/css/dist/featured-image-840.min.css
+plugins/wordpress-seo/css/dist/filter-explanation-840-rtl.min.css
+plugins/wordpress-seo/css/dist/filter-explanation-840.min.css
+plugins/wordpress-seo/css/dist/inside-editor-840-rtl.min.css
+plugins/wordpress-seo/css/dist/inside-editor-840.min.css
+plugins/wordpress-seo/css/dist/metabox-840-rtl.min.css
+plugins/wordpress-seo/css/dist/metabox-840.min.css
+plugins/wordpress-seo/css/dist/metabox-primary-category-840-rtl.min.css
+plugins/wordpress-seo/css/dist/metabox-primary-category-840.min.css
+plugins/wordpress-seo/css/dist/search-appearance-840-rtl.min.css
+plugins/wordpress-seo/css/dist/search-appearance-840.min.css
+plugins/wordpress-seo/css/dist/structured-data-blocks-840-rtl.min.css
+plugins/wordpress-seo/css/dist/structured-data-blocks-840.min.css
+plugins/wordpress-seo/css/dist/toggle-switch-840-rtl.min.css
+plugins/wordpress-seo/css/dist/toggle-switch-840.min.css
+plugins/wordpress-seo/css/dist/wpseo-dismissible-840-rtl.min.css
+plugins/wordpress-seo/css/dist/wpseo-dismissible-840.min.css
+plugins/wordpress-seo/css/dist/yoast-components-840-rtl.min.css
+plugins/wordpress-seo/css/dist/yoast-components-840.min.css
+plugins/wordpress-seo/css/dist/yoast-extensions-840-rtl.min.css
+plugins/wordpress-seo/css/dist/yoast-extensions-840.min.css
+plugins/wordpress-seo/css/dist/yst_plugin_tools-840-rtl.min.css
+plugins/wordpress-seo/css/dist/yst_plugin_tools-840.min.css
+plugins/wordpress-seo/css/dist/yst_seo_score-840-rtl.min.css
+plugins/wordpress-seo/css/dist/yst_seo_score-840.min.css
+plugins/wordpress-seo/js/dist/analysis-840.min.js
+plugins/wordpress-seo/js/dist/babel-polyfill-840.min.js
+plugins/wordpress-seo/js/dist/commons-840.min.js
+plugins/wordpress-seo/js/dist/components-840.min.js
+plugins/wordpress-seo/js/dist/configuration-wizard-840.min.js
+plugins/wordpress-seo/js/dist/search-appearance-840.min.js
+plugins/wordpress-seo/js/dist/wp-seo-admin-840.min.js
+plugins/wordpress-seo/js/dist/wp-seo-admin-global-840.min.js
+plugins/wordpress-seo/js/dist/wp-seo-admin-gsc-840.min.js
+plugins/wordpress-seo/js/dist/wp-seo-admin-media-840.min.js
+plugins/wordpress-seo/js/dist/wp-seo-analysis-worker-840.min.js
+plugins/wordpress-seo/js/dist/wp-seo-api-840.min.js
+plugins/wordpress-seo/js/dist/wp-seo-bulk-editor-840.min.js
+plugins/wordpress-seo/js/dist/wp-seo-dashboard-widget-840.min.js
+plugins/wordpress-seo/js/dist/wp-seo-edit-page-840.min.js
+plugins/wordpress-seo/js/dist/wp-seo-featured-image-840.min.js
+plugins/wordpress-seo/js/dist/wp-seo-filter-explanation-840.min.js
+plugins/wordpress-seo/js/dist/wp-seo-help-center-840.min.js
+plugins/wordpress-seo/js/dist/wp-seo-metabox-840.min.js
+plugins/wordpress-seo/js/dist/wp-seo-metabox-category-840.min.js
+plugins/wordpress-seo/js/dist/wp-seo-modal-840.min.js
+plugins/wordpress-seo/js/dist/wp-seo-network-admin-840.min.js
+plugins/wordpress-seo/js/dist/wp-seo-post-scraper-840.min.js
+plugins/wordpress-seo/js/dist/wp-seo-quick-edit-handler-840.min.js
+plugins/wordpress-seo/js/dist/wp-seo-recalculate-840.min.js
+plugins/wordpress-seo/js/dist/wp-seo-reindex-links-840.min.js
+plugins/wordpress-seo/js/dist/wp-seo-replacevar-plugin-840.min.js
+plugins/wordpress-seo/js/dist/wp-seo-shortcode-plugin-840.min.js
+plugins/wordpress-seo/js/dist/wp-seo-structured-data-blocks-840.min.js
+plugins/wordpress-seo/js/dist/wp-seo-term-scraper-840.min.js
+plugins/wordpress-seo/js/dist/wp-seo-used-keywords-assessment-840.min.js
+plugins/wordpress-seo/js/dist/wp-seo-wp-globals-backport-840.min.js
+plugins/wordpress-seo/languages/wordpress-seo-es_MX.json
+plugins/wordpress-seo/languages/wordpress-seo-uk.json
+plugins/wordpress-seo/languages/wordpress-seojs-es_MX.json
+plugins/wordpress-seo/languages/wordpress-seojs-uk.json
+plugins/wordpress-seo/languages/yoast-components-es_MX.json
+plugins/wordpress-seo/languages/yoast-components-uk.json
+plugins/wp-migrate-db-pro-media-files/asset/build/css/styles.css
+plugins/wp-migrate-db-pro-media-files/asset/build/js/bundle-1410.js
+plugins/wp-migrate-db-pro-media-files/asset/build/js/bundle-1410.js.map
+plugins/wp-migrate-db-pro/asset/build/css/plugin-update-styles.css
+plugins/wp-migrate-db-pro/asset/build/css/styles.css
+plugins/wp-migrate-db-pro/asset/build/img/icon-cli.svg
+plugins/wp-migrate-db-pro/asset/build/img/icon-media-files.svg
+plugins/wp-migrate-db-pro/asset/build/img/icon-multisite-tools.svg
+plugins/wp-migrate-db-pro/asset/build/img/icon-theme-plugin-files.svg
+plugins/wp-migrate-db-pro/asset/build/img/mdb-banner.svg
+plugins/wp-migrate-db-pro/asset/build/img/mor10.png
+plugins/wp-migrate-db-pro/asset/build/img/mor10@2x.png
+plugins/wp-migrate-db-pro/asset/build/js/bundle-186.js
+plugins/wp-migrate-db-pro/asset/build/js/bundle-186.js.map
+plugins/wp-migrate-db-pro/asset/build/js/plugin-update-186.js
+plugins/wp-migrate-db-pro/asset/build/js/plugin-update-186.js.map
+plugins/wp-migrate-db-pro/class/autoload.php
+plugins/wp-migrate-db-pro/class/wpmdb-beta-manager.php
+plugins/wp-migrate-db-pro/class/wpmdb-event-logger.php
+plugins/wp-migrate-db-pro/class/Queue/Carbon.php
+plugins/wp-migrate-db-pro/class/Queue/Connection.php
+plugins/wp-migrate-db-pro/class/Queue/Cron.php
+plugins/wp-migrate-db-pro/class/Queue/Job.php
+plugins/wp-migrate-db-pro/class/Queue/Manager.php
+plugins/wp-migrate-db-pro/class/Queue/Queue.php
+plugins/wp-migrate-db-pro/class/Queue/QueueManager.php
+plugins/wp-migrate-db-pro/class/Queue/Worker.php
+plugins/wp-migrate-db-pro/class/Queue/Connections/ConnectionInterface.php
+plugins/wp-migrate-db-pro/class/Queue/Connections/DatabaseConnection.php
+plugins/wp-migrate-db-pro/class/Queue/Connections/RedisConnection.php
+plugins/wp-migrate-db-pro/class/Queue/Exceptions/ConnectionNotFoundException.php
+plugins/wp-migrate-db-pro/class/Queue/Exceptions/WorkerAttemptsExceededException.php
+plugins/wp-migrate-db-pro/class/Queue/Jobs/WPMDB_Job.php
+plugins/wp-migrate-db-pro/class/Transfers/Receiver.php
+plugins/wp-migrate-db-pro/class/Transfers/Sender.php
+plugins/wp-migrate-db-pro/class/Transfers/Abstracts/TransferManagerAbstract.php
+plugins/wp-migrate-db-pro/class/Transfers/Files/Chunker.php
+plugins/wp-migrate-db-pro/class/Transfers/Files/Excludes.php
+plugins/wp-migrate-db-pro/class/Transfers/Files/FileProcessor.php
+plugins/wp-migrate-db-pro/class/Transfers/Files/Payload.php
+plugins/wp-migrate-db-pro/class/Transfers/Files/TransferManager.php
+plugins/wp-migrate-db-pro/class/Transfers/Files/Util.php
+plugins/wp-migrate-db-pro/template/min-php-message.php
+plugins/wp-migrate-db-pro/template/pro/beta-feedback-reminder.php
+plugins/wp-migrate-db-pro/template/pro/beta-optin.php
+plugins/wp-migrate-db-pro/template/pro/beta-welcome.php
+plugins/wp-migrate-db-pro/template/pro/notice-enable-usage-tracking.php
+plugins/wp-migrate-db-pro/template/pro/toggle-usage-tracking.php
