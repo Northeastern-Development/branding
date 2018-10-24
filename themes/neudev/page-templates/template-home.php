@@ -10,7 +10,7 @@
 			<!-- article -->
 			<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 				<div id="nu__home-content">
-					<h1><?php the_title(); ?></h1><br>
+					<!-- <h1><?php the_title(); ?></h1><br> -->
 					<?php the_content(); ?>
 			  </div>
 
