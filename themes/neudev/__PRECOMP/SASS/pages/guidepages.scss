@@ -52,6 +52,24 @@
       }
     }
   }
+  & > p {
+    & > ul {
+      margin: 0 0 0 $gutter;
+      & > li {
+        @include font-2l-l;
+        margin: 0 0 ($gutter / 2) 0;
+        & > a {
+          color:$brand_colors-black;
+          text-decoration: none;
+          border-bottom:1px solid $brand_colors-red;
+          &:hover {
+            text-decoration: none;
+            color: $brand_colors-red;
+          }
+        }
+      }
+    }
+  }
 }
 
 
