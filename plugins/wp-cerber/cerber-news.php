@@ -180,6 +180,16 @@ function cerber_push_the_news( $version ) {
 	$news['7.8'][] = 'Update: The performance of malware scanning on a slow web server with thousands of issues and tens of thousands of files has been improved.';
 	$news['7.8'][] = 'Fix: If a malicious file is detected on a slow shared hosting, the file can be shown twice in the results of the scan.';
 
+	$news['7.8.5'][] = 'New: A new set of heuristics algorithms for detecting obfuscated malware JavaScript code have been added to the Traffic Inspector firewall rules and malware scanner.';
+	$news['7.8.5'][] = 'New: A new file filter on the Quarantine page lets to filter out quarantined files by the date of the scan.';
+	$news['7.8.5'][] = 'New: The performance of the malware scanner has been improved. Now the scanner deletes all files in the website session and temporary folders permanently before the scan.';
+	$news['7.8.5'][] = 'Update: Now if the plugin is unable to detect the remote IP address, it will use 0.0.0.0 as an IP.';
+	$news['7.8.5'][] = 'Update: The anti-spam engine will never block the localhost IP which is 127.0.0.1 in case of IPv4 and ::1 in case of IPv6.';
+	$news['7.8.5'][] = 'Update: Improved handling the plugin settings in a buggy or misconfigured hosting environment that could cause the plugin to reset settings to their default values.';
+	$news['7.8.5'][] = 'Update: Translations have been updated. Thanks to Francesco, Jos Knippen, Fredrik Näslund, Slobodan Ljubic and MARCELHAP.';
+	$news['7.8.5'][] = 'Fix: Fixed an issue with saving settings on the Hardening tab: "Unable to get access to the file…"';
+
+
 	if ( ! empty( $news[ $version ] ) ) {
 		//$text = '<h3>What\'s new in WP Cerber '.$version.'</h3>';
 

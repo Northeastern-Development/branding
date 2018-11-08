@@ -34,7 +34,7 @@
 // If this file is called directly, abort executing.
 if ( ! defined( 'WPINC' ) ) { exit; }
 
-define( 'LAB_NODE_MAX', 7 ); // Maximum node ID
+define( 'LAB_NODE_MAX', 9 ); // Maximum node ID
 define( 'LAB_DELAY_MAX', 2000 ); // milliseconds, reasonable maximum of processing time while connecting to a node
 define( 'LAB_RECHECK', 15 * 60 ); // seconds, allowed interval for rechecking nodes
 define( 'LAB_INTERVAL', 180 ); // seconds, push interval
@@ -92,7 +92,6 @@ function lab_is_blocked( $ip, $ask = true ) {
  * @return int  Reputation for a given IP
  */
 function lab_get_reputation( $ip, $ask = true ) {
-	global $wpdb;
 
 	if ( ! $ip = filter_var( $ip, FILTER_VALIDATE_IP ) ) {
 		return LAB_IP_OK;
@@ -147,7 +146,6 @@ function lab_get_reputation( $ip, $ask = true ) {
 }
 
 function lab_reputation_update( $ip, $ip_data ) {
-	global $wpdb;
 
 	if ( empty( $ip_data['reputation'] ) ) {
 		return;
@@ -161,10 +159,10 @@ function lab_reputation_update( $ip, $ip_data ) {
 	$expires    = time() + absint( $ip_data['reputation']['ttl'] );
 
 	if ( cerber_db_get_var( 'SELECT COUNT(ip) FROM ' . CERBER_LAB_IP_TABLE . ' WHERE ip = "' . $ip . '"' ) ) {
-		$wpdb->query( 'UPDATE ' . CERBER_LAB_IP_TABLE . ' SET reputation = ' . $reputation . ', expires = ' . $expires . ' WHERE ip = "' . $ip . '"' );
+		cerber_db_query( 'UPDATE ' . CERBER_LAB_IP_TABLE . ' SET reputation = ' . $reputation . ', expires = ' . $expires . ' WHERE ip = "' . $ip . '"' );
 	}
 	else {
-		$wpdb->query( 'INSERT INTO ' . CERBER_LAB_IP_TABLE . ' (ip, reputation, expires) VALUES ("' . $ip . '",' . $reputation . ',' . $expires . ')' );
+		cerber_db_query( 'INSERT INTO ' . CERBER_LAB_IP_TABLE . ' (ip, reputation, expires) VALUES ("' . $ip . '",' . $reputation . ',' . $expires . ')' );
 	}
 }
 
@@ -175,7 +173,7 @@ function lab_reputation_update( $ip, $ip_data ) {
  *
  * @return array|bool
  */
-function lab_api_send_request($workload = array()) {
+function lab_api_send_request( $workload = array() ) {
 	global $node_delay;
 
 	$push = lab_get_push();
@@ -186,28 +184,28 @@ function lab_api_send_request($workload = array()) {
 
 	$key = lab_get_key();
 
-	if ($workload && empty($key[2]) && !$push) {
+	if ( $workload && empty( $key[2] ) && ! $push ) {
 		return false;
 	}
 
 	$request = array(
-		'key' => $key,
+		'key'      => $key,
 		'workload' => $workload,
-		'push' => $push,
-		'lang' => crb_get_bloginfo( 'language' ),
-		'multi' => is_multisite(),
-		'version' => CERBER_VER,
-		'PHP' => PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION,
-		'sapi' => php_sapi_name(),
+		'push'     => $push,
+		'lang'     => crb_get_bloginfo( 'language' ),
+		'multi'    => is_multisite(),
+		'version'  => CERBER_VER,
+		'PHP'      => PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION,
+		'sapi'     => PHP_SAPI,
 	);
 
 	$ret = lab_send_request($request);
 
 	// If something goes wrong, take the next closest node
-	if (!$ret){
-		$ret = lab_send_request($request);
+	if ( ! $ret ) {
+		$ret = lab_send_request( $request );
 	}
-	elseif (($node_delay * 1000) > LAB_DELAY_MAX){
+	elseif ( ( $node_delay * 1000 ) > LAB_DELAY_MAX ) {
 		lab_check_nodes(); // Recheck nodes for further requests
 	}
 
@@ -555,18 +553,16 @@ function lab_save_push( $ip, $reason_id, $details ) {
  * @return array|bool
  */
 function lab_get_push() {
-	global $wpdb;
-
-	$result = $wpdb->get_results( 'SELECT * FROM ' . CERBER_LAB_TABLE, ARRAY_A );
+	//$result = $wpdb->get_results( 'SELECT * FROM ' . CERBER_LAB_TABLE, ARRAY_A );
+	$result = cerber_db_get_results( 'SELECT * FROM ' . CERBER_LAB_TABLE, MYSQLI_ASSOC );
 	if ( $result ) {
 		return array( 'type_1' => $result );
 	}
 
 	return false;
 }
+
 function lab_trunc_push(){
-	//global $wpdb;
-	//$wpdb->query( 'TRUNCATE TABLE ' . CERBER_LAB_TABLE );
 	cerber_db_query( 'TRUNCATE TABLE ' . CERBER_LAB_TABLE );
 }
 
@@ -607,7 +603,7 @@ function lab_get_key( $refresh = false, $nocache = false) {
 			$key[0] = lab_gen_site_id();
 		}
 		else {
-			// WP is installed in a subdirectory
+			// Fix: WP is installed in a subdirectory, rewrite old domain based site ID
 			if ( 2 < substr_count( home_url(), '/' ) ) {
 				$key[0] = lab_gen_site_id();
 			}
@@ -673,7 +669,7 @@ function lab_validate_lic( $lic = '' ) {
 		$i --;
 	}
 
-	if ( ! $ret || empty( $ret['response']['expires_gmt'] ) ) {
+	if ( ! $ret || !isset( $ret['response']['expires_gmt'] ) ) {
 		cerber_admin_notice( 'A network error occurred while verifying the license key. Please try again in a couple of minutes.' );
 		$expires = 0;
 	}
@@ -739,8 +735,10 @@ function lab_opt_in(){
 			return;
 		}
 	}
-	if ( $c = get_site_option( '_cerber_activated' ) ) {
-		$c = maybe_unserialize( $c );
+
+	//if ( $c = get_site_option( '_cerber_activated' ) ) {
+	//	$c = maybe_unserialize( $c );
+	if ( $c = cerber_get_set( '_activated' ) ) {
 		if ( ! empty( $c['time'] ) && ( $c['time'] + 3600 * 24 * 7 ) > time() ) {
 			return;
 		}
@@ -798,7 +796,7 @@ function lab_user_opt_in( $button = '' ) {
  * @return array|string|bool    A list of country codes if a list of IPs provided, otherwise a string with the country code.
  */
 function lab_get_country( $ip, $cache_only = true ) {
-	global $wpdb, $remote_country;
+	global $remote_country;
 
 	if (!lab_lab()){
 		return false;
@@ -883,7 +881,7 @@ function lab_get_country( $ip, $cache_only = true ) {
  * @param array $data IP and its network data
  */
 function lab_geo_update( $ip = '', $data = array() ) {
-	global $wpdb, $remote_country;
+	global $remote_country;
 	if ( empty( $data['network']['geo'] ) ) {
 		return;
 	}
@@ -904,11 +902,11 @@ function lab_geo_update( $ip = '', $data = array() ) {
 
 	$exists = cerber_db_get_var( 'SELECT ip FROM ' . CERBER_LAB_NET_TABLE . $where );
 
-	if ($exists){
-		$wpdb->query( 'UPDATE ' . CERBER_LAB_NET_TABLE . " SET expires = $expires, country = '$code' $where");
+	if ( $exists ) {
+		cerber_db_query( 'UPDATE ' . CERBER_LAB_NET_TABLE . " SET expires = $expires, country = '$code' $where" );
 	}
 	else {
-		$wpdb->query( 'INSERT INTO ' . CERBER_LAB_NET_TABLE . " (ip, ip_long_begin, ip_long_end, country, expires) VALUES ('{$ip}',{$begin},{$end},'{$code}',{$expires})" );
+		cerber_db_query( 'INSERT INTO ' . CERBER_LAB_NET_TABLE . " (ip, ip_long_begin, ip_long_end, country, expires) VALUES ('{$ip}',{$begin},{$end},'{$code}',{$expires})" );
 	}
 
 	// The list of names of the countries
@@ -919,7 +917,7 @@ function lab_geo_update( $ip = '', $data = array() ) {
 			$exists = cerber_db_get_var( 'SELECT country FROM ' . CERBER_GEO_TABLE . $where );
 
 			if ( ! $exists ) {
-				$wpdb->query( 'INSERT INTO ' . CERBER_GEO_TABLE . ' (country, locale, country_name) VALUES ("' . $code . '","' . $locale . '","' . $name . '")' );
+				cerber_db_query( 'INSERT INTO ' . CERBER_GEO_TABLE . ' (country, locale, country_name) VALUES ("' . $code . '","' . $locale . '","' . $name . '")' );
 			}
 			else {
 				//$wpdb->query( 'UPDATE ' . CERBER_GEO_TABLE . ' SET country_name = "' . $name . '"' . $where );
@@ -929,12 +927,11 @@ function lab_geo_update( $ip = '', $data = array() ) {
 }
 
 function lab_cleanup_cache() {
-	global $wpdb;
 	if ( ! current_user_can( 'manage_options' ) ) {
 		return;
 	}
-	$wpdb->query( 'TRUNCATE TABLE ' . CERBER_LAB_NET_TABLE );
-	$wpdb->query( 'TRUNCATE TABLE ' . CERBER_LAB_IP_TABLE );
+	cerber_db_query( 'TRUNCATE TABLE ' . CERBER_LAB_NET_TABLE );
+	cerber_db_query( 'TRUNCATE TABLE ' . CERBER_LAB_IP_TABLE );
 }
 
 /**

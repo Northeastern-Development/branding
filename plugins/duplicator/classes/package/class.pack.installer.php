@@ -62,6 +62,7 @@ class DUP_Installer
             "assets/inc.libs.js.php"				=> "@@INC.LIBS.JS.PHP@@",
             "assets/inc.js.php"						=> "@@INC.JS.PHP@@",
             "classes/utilities/class.u.php"			=> "@@CLASS.U.PHP@@",
+            "classes/class.csrf.php"				=> "@@CLASS.CSRF.PHP@@",
             "classes/class.server.php"				=> "@@CLASS.SERVER.PHP@@",
             "classes/class.db.php"					=> "@@CLASS.DB.PHP@@",
             "classes/class.logging.php"				=> "@@CLASS.LOGGING.PHP@@",
@@ -88,7 +89,7 @@ class DUP_Installer
             $insert_data = @file_get_contents($file_path);
             file_put_contents($template_path, str_replace("${token}", "{$insert_data}", $search_data));
             if ($search_data === false || $insert_data == false) {
-                DUP_Log::Error("Installer generation failed at {$token}.");
+                DUP_Log::Error("Installer generation failed at {$token}.", '');
             }
             @chmod($file_path, 0644);
         }
@@ -137,7 +138,7 @@ class DUP_Installer
 
         global $wpdb;
 
-        DUP_Log::Info("Preping for use");
+        DUP_Log::Info("Preparing for use");
         $installer = DUP_Util::safePath(DUPLICATOR_SSDIR_PATH_TMP)."/{$this->Package->NameHash}_installer.php";
 
         //Option values to delete at install time
@@ -174,8 +175,10 @@ class DUP_Installer
             "fwrite_opts_delete" => json_encode($deleteOpts),
             "fwrite_blogname" => esc_html(get_option('blogname')),
             "fwrite_wproot" => DUPLICATOR_WPROOTPATH,
-			"fwrite_wplogin_url" => wp_login_url(),
-            "fwrite_duplicator_version" => DUPLICATOR_VERSION);
+            "fwrite_wplogin_url" => wp_login_url(),
+            "package_hash" => $this->Package->getPackageHash(),
+            "fwrite_duplicator_version" => DUPLICATOR_VERSION
+        );
 
         if (file_exists($template) && is_readable($template)) {
             $err_msg     = "ERROR: Unable to read/write installer. \nERROR INFO: Check permission/owner on file and parent folder.\nInstaller File = <{$installer}>";

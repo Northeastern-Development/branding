@@ -5,7 +5,7 @@ Tags: security, malware scanner, antispam, firewall, limit login attempts, custo
 Requires at least: 4.5
 Requires PHP: 5.4
 Tested up to: 4.9
-Stable tag: 7.8
+Stable tag: 7.8.5
 License: GPLv2
 
 Protection against hacker attacks and bots. Malware scanner & integrity checker. User activity log. Antispam reCAPTCHA. Limit login attempts.
@@ -16,7 +16,7 @@ Defends WordPress against hacker attacks, spam, trojans and malware.
 Mitigates brute force attacks by limiting the number of login attempts through the login form, XML-RPC / REST API requests or using auth cookies.
 Restricts access with the Black IP Access List and the White IP Access List.
 Tracks user and intruder activity with powerful email, mobile and desktop notifications.
-Stop spam: activates Cerber antispam engine and Google reCAPTCHA for protecting registration, contact and comments forms.
+Stops spam: activates Cerber anti-spam engine and Google reCAPTCHA for protecting registration, contact and comments forms.
 Advanced malware scanner, integrity checker and file monitor.
 Hardening WordPress with a set of security rules and comprehensive algorithms.
 
@@ -307,6 +307,18 @@ To get access to your dashboard you need to copy the WP Cerber Reset folder to t
 
 
 == Changelog ==
+= 7.8.5 =
+* New: A new set of heuristics algorithms for detecting obfuscated malware JavaScript code.
+* New: A new file filter on the Quarantine page lets to filter out quarantined files by the date of the scan.
+* New: The performance of [the malware scanner](https://wpcerber.com/wordpress-security-scanner/) has been improved. Now the scanner deletes all files in the website session and temporary folders permanently before the scan.
+* Update: If the plugin is unable to detect the remote IP address, it uses 0.0.0.0 as an IP.
+* Update: The antispam engine will never block the localhost IP
+* Update: Performance improvements for database queries related to the process of user authentication.
+* Update: Improved handling the plugin settings in a buggy or misconfigured hosting environment that could cause the plugin to reset settings to their default values.
+* Update: Translations have been updated. Thanks to Francesco, Jos Knippen, Fredrik Näslund, Slobodan Ljubic and MARCELHAP.
+* Fix: Fixed an issue with saving settings on the Hardening tab: "Unable to get access to the file…"
+* [Read more](https://wpcerber.com/wp-cerber-security-7-8-5/)
+
 = 7.8 =
 * New: An ignore list for the malware scanner.
 * New: Disabling execution of PHP scripts in the WordPress media folder helps to prevent offenders from exploiting security flaws.
@@ -459,14 +471,6 @@ To get access to your dashboard you need to copy the WP Cerber Reset folder to t
 * New: Added code to avoid possible conflict between Custom login URL and REST API.
 * New: Italian translation has been added, thanks to Francesco Venuti.
 * Bug fixed: WordPress database error: Table '...cerber_lab_net' doesn't exist.
-
-= 4.9 =
-* New: Additional details will be logged and displayed on the Activity page: the URL of a request and decision the plugin engine had made.
-* New: Added a nice panel with performance indicators showing key events and plugin performance in the last 24 hours.
-* New: To improve reliability self check-up code has been added.
-* New: Polish translation has been added, thanks to Wojciech Górski.
-* New: On a multisite WP installation scheduled tasks will be executed once per hour for the entire network: there will no excess SQL queries when the plugin executes hourly cron tasks.
-* Bug fixed: The language for visible reCAPTCHA doesn't set according to the site language setting. It's always English.
 
 == Other Notes ==
 

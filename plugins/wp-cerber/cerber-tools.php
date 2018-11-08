@@ -462,7 +462,7 @@ function cerber_get_chmod( $file ) {
  *
  */
 function cerber_db_diag(){
-	global $wpdb,$wp_cerber;
+	global $wp_cerber;
 	$ret = array();
 
 	$ret[]= 'Database name: '.DB_NAME;
@@ -482,13 +482,15 @@ function cerber_db_diag(){
 	$ret[]= cerber_table_info(CERBER_BLOCKS_TABLE);
 	$ret[]= cerber_table_info(CERBER_TRAF_TABLE);
 
-	if ($wp_cerber->getRemoteIp() == '127.0.0.1') $ret[] = '<p style="color: #DF0000;">It seems that we are unable to get IP addresses.</p>';
-
-	if ($errors = get_site_option( '_cerber_db_errors')){
-		$err = '<p style="color: #DF0000;">Some minor DB errors were detected</p><textarea>'.print_r($errors,1).'</textarea>';
-		update_site_option( '_cerber_db_errors', '');
+	if ( $wp_cerber->getRemoteIp() === CERBER_NO_REMOTE_IP ) {
+		$ret[] = '<p style="color: #DF0000;">It seems that we are unable to get IP addresses.</p>';
 	}
-	else $err = '';
+
+	$err = '';
+	if ( $errors = get_site_option( '_cerber_db_errors' ) ) {
+		$err = '<p style="color: #DF0000;">Some minor DB errors were detected</p><textarea>' . print_r( $errors, 1 ) . '</textarea>';
+		update_site_option( '_cerber_db_errors', '' );
+	}
 
 	return $err.implode('<br>',$ret);
 }
@@ -603,8 +605,8 @@ function cerber_show_diag_log() {
 			return;
 		}
 		fclose( $log );
-		$p    = strpos( $text, PHP_EOL );
-		$text = substr( $text, $p + 1 );
+		/*$p    = strpos( $text, PHP_EOL );
+		$text = substr( $text, $p + 1 );*/
 		echo $nav;
 		echo '<div id="crb-log-viewer"><pre>' . nl2br( htmlentities( $text ) ) . '</pre></div>';
 	}

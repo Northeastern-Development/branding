@@ -347,7 +347,7 @@ function cerber_get_remote_ip(){
 	}
 	// No IP address was found? Roll back to localhost.
 	if ( ! $remote_ip ) { // including WP-CLI, other way is: if defined('WP_CLI')
-		$remote_ip = '127.0.0.1';
+		$remote_ip = CERBER_NO_REMOTE_IP;
 	}
 
 	$remote_ip = cerber_short_ipv6( $remote_ip );
@@ -583,7 +583,7 @@ function cerber_is_http_post(){
  *
  * @return bool|string
  */
-function cerber_get_get($key){
+function cerber_get_get( $key ) {
 	if ( isset( $_GET[ $key ] ) ) {
 		return $_GET[ $key ];
 	}
@@ -899,6 +899,7 @@ function cerber_get_labels( $type = 'activity', $all = true ) {
 		$labels[21] = __( 'Suspicious number of nested values', 'wp-cerber' );
 		$labels[22] = __( 'Malicious code detected', 'wp-cerber' );
 		$labels[23] = __( 'Suspicious SQL code detected', 'wp-cerber' );
+		$labels[24] = __( 'Suspicious JavaScript code detected', 'wp-cerber' );
 	}
 
 	return $labels;
@@ -999,6 +1000,12 @@ function cerber_admin_message( $msg ) {
 	}
 	update_site_option( 'cerber_admin_message', $notice );
 }
+
+function crb_clear_admin_msg(){
+	update_site_option('cerber_admin_notice', null);
+	update_site_option('cerber_admin_message', null);
+}
+
 /**
  * Return human readable "ago" time
  * 
@@ -1429,16 +1436,31 @@ function cerber_db_get_results( $query, $type = MYSQLI_ASSOC ) {
 			mysqli_free_result( $result );
 		}
 		else {
-			if ( $type == MYSQL_ASSOC ) {
-				while ( $row = mysql_fetch_assoc( $result ) ) { // For compatibility reason only
-					$ret[] = $row;
-				}
+			switch ( $type ) {
+				case MYSQL_ASSOC:
+					while ( $row = mysql_fetch_assoc( $result ) ) { // For compatibility reason only
+						$ret[] = $row;
+					}
+					break;
+				case MYSQL_FETCH_OBJECT:
+					while ( $row = mysql_fetch_object( $result ) ) {
+						$ret[] = $row;
+					}
+					break;
+				case MYSQL_FETCH_OBJECT_K:
+					while ( $row = mysql_fetch_object( $result ) ) {
+						$vars = get_object_vars( $row );
+						$key = array_shift( $vars );
+						$ret[ $key ] = $row;
+					}
+					break;
+				default:
+					while ( $row = mysql_fetch_row( $result ) ) {
+						$ret[] = $row;
+					}
+
 			}
-			else {
-				while ( $row = mysql_fetch_row( $result ) ) { // For compatibility reason only
-					$ret[] = $row;
-				}
-			}
+
 			mysql_free_result( $result ); // For compatibility reason only
 		}
 	}
@@ -1739,8 +1761,19 @@ function cerber_htaccess_sync( $file, $settings = array() ) {
 	}
 
 	if ( 'media' == $file ) {
+		/*if ( ! crb_is_php_mod() ) {
+			return 'ERROR: The Apache PHP module mod_php is not active.';
+		}*/
 		$rules = array();
 		if ( ! empty( $settings['phpnoupl'] ) ) {
+
+			$rules [] = '<Files *>';
+			$rules [] = 'SetHandler none';
+			$rules [] = 'SetHandler default-handler';
+			$rules [] = 'Options -ExecCGI';
+			$rules [] = 'RemoveHandler .cgi .php .php3 .php4 .php5 .php7 .phtml .pl .py .pyc .pyo';
+			$rules [] = '</Files>';
+
 			$rules [] = '<IfModule mod_php7.c>';
 			$rules [] = 'php_flag engine off';
 			$rules [] = '</IfModule>';
@@ -1774,34 +1807,34 @@ function cerber_htaccess_clean_up() {
  */
 function cerber_update_htaccess( $file, $rules = array() ) {
 	if ( $file == 'main' ) {
-		$htaccess_file = cerber_get_htaccess_file();
+		$htaccess = cerber_get_htaccess_file();
 		$marker = CERBER_MARKER1;
 	}
 	elseif ( $file == 'media' ) {
-		$htaccess_file = cerber_get_upload_dir() . '/.htaccess';
+		$htaccess = cerber_get_upload_dir() . '/.htaccess';
 		$marker = CERBER_MARKER2;
 	}
 	else {
 		return '???';
 	}
 
-	if ( ! is_file( $htaccess_file ) ) {
-		if ( ! touch( $htaccess_file ) ) {
-			return new WP_Error( 'htaccess-io', 'ERROR: Unable to create the file ' . $htaccess_file);
+	if ( ! is_file( $htaccess ) ) {
+		if ( ! touch( $htaccess ) ) {
+			return new WP_Error( 'htaccess-io', 'ERROR: Unable to create the file ' . $htaccess);
 		}
 	}
-	elseif ( ! is_writable( $file ) ) {
-		return new WP_Error( 'htaccess-io', 'ERROR: Unable to get access to the file ' . $htaccess_file);
+	elseif ( ! is_writable( $htaccess ) ) {
+		return new WP_Error( 'htaccess-io', 'ERROR: Unable to get access to the file ' . $htaccess);
 	}
 
 	require_once( ABSPATH . 'wp-admin/includes/misc.php' );
-	$result = insert_with_markers( $htaccess_file, $marker, $rules );
+	$result = insert_with_markers( $htaccess, $marker, $rules );
 
 	if ( $result || $result === 0 ) {
-		$result = 'The ' . $htaccess_file . ' file has been updated';
+		$result = 'The ' . $htaccess . ' file has been updated';
 	}
 	else {
-		$result = new WP_Error( 'htaccess-io', 'ERROR: Unable to modify the file ' . $htaccess_file);
+		$result = new WP_Error( 'htaccess-io', 'ERROR: Unable to modify the file ' . $htaccess);
 	}
 
 	return $result;
@@ -2107,4 +2140,53 @@ function crb_is_php_mod() {
 	}
 
 	return false;
+}
+
+/**
+ * PHP implementation of fromCharCode
+ *
+ * @param $str
+ *
+ * @return string
+ */
+function cerber_fromcharcode( $str ) {
+	$vals = explode( ',', $str );
+	$vals = array_map( function ( $v ) {
+		$v = trim( $v );
+		if ( $v{0} == '0' ) {
+			$v = ( $v{1} == 'x' || $v{1} == 'X' ) ? hexdec( $v ) : octdec( $v );
+		}
+		else {
+			$v = intval( $v );
+		}
+
+		return '&#' . $v . ';';
+	}, $vals );
+	$ret  = mb_convert_encoding( implode( '', $vals ), 'UTF-8', 'HTML-ENTITIES' );
+
+	return $ret;
+}
+
+function cerber_empty_dir( $dir ) {
+	if ( ! is_dir( $dir ) ||
+	     0 === strpos( $dir, ABSPATH ) ) { // Workaround for non-legitimate using this function
+		return false;
+	}
+	$files = @scandir( $dir );
+	if ( ! is_array( $files ) ) {
+		return false;
+	}
+	if ( empty( $files ) ) {
+		return 0;
+	}
+	$count = 0;
+	foreach ( $files as $file ) {
+		if ( is_file( $dir . $file ) ) {
+			if ( unlink( $dir . $file ) ) {
+				$count ++;
+			}
+		}
+	}
+
+	return $count;
 }

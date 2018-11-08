@@ -467,20 +467,19 @@ p.act-url{
     vertical-align: middle;
 }
 
-
-.ip-aclB,.color-black {
+.ip-aclB, .crb-color-black {
     background-color: #000;
-    color: #ffffff;
+    color: #fff;
 }
 
-.ip-aclW,.color-green {
+.ip-aclW, .crb-color-green {
     background-color: #83CE77;
-    color: #ffffff;
+    color: #fff;
 }
 
 .color-blocked {
     background-color: #FF5733;
-    color: #ffffff;
+    color: #fff;
 }
 
 .green_label, .actv5 {

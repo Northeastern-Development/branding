@@ -9,20 +9,24 @@ body.page-template-template-home {
   // margin-left:5%;
   & > h1 {
     @include font-5b-c;
+    color:$brand_colors-white;
   }
   & > h3 {
     @include font-2b-l;
+    color:$brand_colors-white;
   }
   & > p {
     @include font-2l-l;
+    color:$brand_colors-white;
     margin: 0 0 $gutter 0;
     & > a {
-      color:$brand_colors-black;
+      color:$brand_colors-white;
       text-decoration: none;
-      border-bottom:1px solid $brand_colors-red;
+      border-bottom:1px solid $brand_colors-white;
       &:hover {
         text-decoration: none;
-        color: $brand_colors-red;
+        color:$brand_colors-red;
+        //border-bottom:1px solid $brand_colors-red;
       }
     }
   }
@@ -32,9 +36,9 @@ body.page-template-template-home {
       @include font-2l-l;
       margin: 0 0 ($gutter / 2) 0;
       & > a {
-        color:$brand_colors-black;
+        color:$brand_colors-white;
         text-decoration: none;
-        border-bottom:1px solid $brand_colors-red;
+        border-bottom:1px solid $brand_colors-white;
         &:hover {
           text-decoration: none;
           color: $brand_colors-red;

@@ -124,9 +124,9 @@ function cerber_settings_init(){
 	add_settings_field('stopenum',__('Stop user enumeration','wp-cerber'),'cerberus_field_show',CERBER_OPT_H,'hwp',array('group'=>$tab,'option'=>'stopenum','type'=>'checkbox','label'=>__('Block access to user pages like /?author=n and user data via REST API','wp-cerber')));
 	add_settings_field('adminphp',__('Protect admin scripts','wp-cerber'),'cerberus_field_show',CERBER_OPT_H,'hwp',array('group'=>$tab,'option'=>'adminphp','type'=>'checkbox','label'=>__('Block unauthorized access to load-scripts.php and load-styles.php','wp-cerber')));
 
-	if ( crb_is_php_mod() ) {
+	//if ( crb_is_php_mod() ) {
 	    add_settings_field('phpnoupl',__('Disable PHP in uploads','wp-cerber'),'cerber_field_show',CERBER_OPT_H,'hwp',array('group'=>$tab,'setting'=>'phpnoupl','type'=>'checkbox','label'=>__('Disable execution of PHP scripts in the WordPress media folder','wp-cerber')));
-	}
+	//}
 	add_settings_field('nophperr',__('Disable PHP error displaying','wp-cerber'),'cerber_field_show',CERBER_OPT_H,'hwp',array('group'=>$tab,'setting'=>'nophperr','type'=>'checkbox'));
 
 	add_settings_field('xmlrpc',__('Disable XML-RPC','wp-cerber'),'cerberus_field_show',CERBER_OPT_H,'hwp',array('group'=>$tab,'option'=>'xmlrpc','type'=>'checkbox','label'=>__('Block access to the XML-RPC server (including Pingbacks and Trackbacks)','wp-cerber')));
@@ -965,23 +965,21 @@ function cerber_field_show($args){
 /**
  * @param $name string HTML input name
  * @param $list array   List of elements
- * @param null $selected Index of selected element in the list 
+ * @param null $selected Index of selected element
  * @param string $class HTML class
  * @param string $multiple
  *
- * @return string   HTML for select element
+ * @return string
  */
-function cerber_select($name, $list, $selected = null, $class = '' , $multiple = ''){
+function cerber_select( $name, $list, $selected = null, $class = '', $multiple = '' ) {
 	$options = array();
-	foreach ($list as $key => $value ) {
-		if ($selected == (string)$key) {
-			$s = 'selected';
-		}
-		else $s = '';
-		$options[]= '<option value="'.$key.'" '.$s.'>'.htmlspecialchars($value).'</option>';
+	foreach ( $list as $key => $value ) {
+		$s         = ( $selected == (string) $key ) ? 'selected' : '';
+		$options[] = '<option value="' . $key . '" ' . $s . '>' . htmlspecialchars( $value ) . '</option>';
 	}
-	if ($multiple) $m = 'multiple="multiple"'; else $m = '';
-	return ' <select name="'.$name.'" class="crb-select '.$class.'" '.$m.'>'.implode("\n",$options).'</select>';
+	$m = ( $multiple ) ? 'multiple="multiple"' : '';
+
+	return ' <select name="' . $name . '" class="crb-select ' . $class . '" ' . $m . '>' . implode( "\n", $options ) . '</select>';
 }
 
 function cerber_time_select($args, $settings){
@@ -1276,11 +1274,13 @@ add_filter( 'pre_update_option_' . CERBER_OPT_E, function ( $new, $old, $option 
 		}
 	}
 
-	if ( cerber_cloud_sync( $new ) ) {
-		cerber_admin_message( __( 'The schedule has been updated', 'wp-cerber' ) );
-	}
-	else {
-		cerber_admin_message( __( 'Unable to update the schedule', 'wp-cerber' ) );
+	if ( lab_lab() ) {
+		if ( cerber_cloud_sync( $new ) ) {
+			cerber_admin_message( __( 'The schedule has been updated', 'wp-cerber' ) );
+		}
+		else {
+			cerber_admin_message( __( 'Unable to update the schedule', 'wp-cerber' ) );
+		}
 	}
 
 	return $new;
@@ -1306,7 +1306,7 @@ function cerber_normal_dirs( $list = array() ) {
 	$ready = array();
 
 	foreach ( $list as $item ) {
-		//$list = array_filter( $list, function ( $item ) {
+		$item = rtrim( cerber_normal_path( $item ), '/\\' ) . DIRECTORY_SEPARATOR;
 		if ( ! @is_dir( $item ) ) {
 			$dir = cerber_get_abspath() . ltrim( $item, DIRECTORY_SEPARATOR );
 			if ( ! @is_dir( $dir ) ) {
@@ -1315,7 +1315,7 @@ function cerber_normal_dirs( $list = array() ) {
 			}
 			$item = $dir;
 		}
-		$ready[] = cerber_normal_path( $item );
+		$ready[] = $item;
 	}
 
 	return $ready;

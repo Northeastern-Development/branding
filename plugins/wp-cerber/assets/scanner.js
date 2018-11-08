@@ -89,7 +89,7 @@ jQuery(document).ready(function ($) {
             $(this).html($(this).data('init'));
         });
 
-        crb_scan_message.slideDown().html(crb_scan_msg_steps[1]);
+        crb_scan_message.slideDown().html(crb_scan_msg_steps[0]);
         cerber_update_bar(true);
         cerber_scan_controls('scanning');
         crb_scan_browser.find('tr').not('.crb-scan-container').remove();
@@ -319,7 +319,7 @@ jQuery(document).ready(function ($) {
                         //rbox = '<input type="checkbox" name="" data-file_name="' + full_name + '">';
                         rbox = '<input type="checkbox">';
                     }
-                    section_items.push('<tr class="crb-item-file" data-itype="' + issue_type_id + '" data-file_name="' + full_name + '"><td>' + rbox + '</td><td data-file-name="' + full_name + '" data-short="' + f_name + '" class="' + name_classes + '">' + f_name + '</td><td>' + cerber_get_issue_txt(index, single_issue) + '</td><td class="risk' + risk + '"><span>' + crb_scan_msg_risks[risk] + '</span></td><td>' + isize + '</td><td>' + itime + '</td></tr>');
+                    section_items.push('<tr class="crb-item-file" data-itype="' + issue_type_id + '" data-file_name="' + full_name + '"><td>' + rbox + '</td><td data-short="' + f_name + '" class="' + name_classes + '">' + f_name + '</td><td>' + cerber_get_issue_txt(index, single_issue) + '</td><td class="risk' + risk + '"><span>' + crb_scan_msg_risks[risk] + '</span></td><td>' + isize + '</td><td>' + itime + '</td></tr>');
                 }
 
                 crb_issues_counter[risk]++;
@@ -583,7 +583,8 @@ jQuery(document).ready(function ($) {
 
             if (server_response.processed && server_response.processed.length) {
                 $.each(server_response.processed, function (index, file_name) {
-                    crb_scan_browser.find('td[data-file-name="' + file_name + '"]').parent().remove();
+                    //crb_scan_browser.find('td[data-file-name="' + file_name + '"]').parent().remove();
+                    crb_scan_browser.find('tr[data-file_name="' + file_name + '"]').remove();
                 });
             }
 
@@ -595,26 +596,18 @@ jQuery(document).ready(function ($) {
     }
 
     function cerber_toggle_file_name(control) {
-        var items = crb_scan_browser.find('.crb-item-file td[data-file-name]');
-        if (!window.cerber_full_toggler) {
-            window.cerber_full_toggler = 1;
+        window.cerber_name_toggler = (!window.cerber_name_toggler) ? 1 : 0;
+        var full_name, td;
+        if (window.cerber_name_toggler) {
+            $('.crb-item-file').each(function () {
+                full_name = $(this).data('file_name');
+                $(this).find('td:nth-child(2)').html(full_name);
+            });
         }
         else {
-            window.cerber_full_toggler = 0;
-        }
-        if (items.length) {
-            $.each(items, function () {
-                if ($(this).data('file-name') === '') {
-                    return;
-                }
-                if (window.cerber_full_toggler) {
-                    $(this).html($(this).data('file-name'));
-                    //$(control).text('Hide full paths');
-                }
-                else {
-                    $(this).html($(this).data('short'));
-                    //$(control).text('Show full paths');
-                }
+            $('.crb-item-file').each(function () {
+                td = $(this).find('td:nth-child(2)');
+                td.html($(td).data('short'));
             });
         }
     }
@@ -838,10 +831,11 @@ jQuery(document).ready(function ($) {
     // File viewer
 
     crb_scan_browser.on('click', 'td', function (event) {
-        if (typeof $(this).data('file-name') === "undefined" || $(this).data('file-name') === '') {
+        if (typeof $(this).data('short') === "undefined" || $(this).data('short') === '') {
             return;
         }
-        var file_name = $(this).data('file-name');
+        //var file_name = $(this).data('file-name');
+        var file_name = $(this).closest('tr').data('file_name');
 
         var view_width = window.innerWidth * 0.8;
         var view_height = window.innerHeight * 0.8;

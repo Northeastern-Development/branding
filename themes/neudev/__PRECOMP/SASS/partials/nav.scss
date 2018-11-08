@@ -64,6 +64,7 @@ $mobileNav: 959px;
       float:none;
       & > li {
         @include font-1r-l;
+        line-height:38px;
         margin-right: $gutter;
         display: block;
         &:last-child {
